@@ -25,8 +25,19 @@ img = img[0:2 ** 10 - 1, 0:2 ** 10 - 1]
 
 
 def get_marker_from_background(img, area_bg):
+      fig = plt.figure(figsize=(10, 10))
+      ax = [fig.add_subplot(2, 2, 1),
+            fig.add_subplot(2, 2, 2),
+            fig.add_subplot(2, 2, 3),
+            fig.add_subplot(2, 2, 4)]
+      ax[0].imshow(cv2.merge((area_bg, area_bg, area_bg)))
+
       area_dist = cv2.distanceTransform(area_bg, cv2.DIST_L2, 0)
+
+      ax[2].imshow(cv2.merge((area_dist, area_dist, area_dist)))
+
       area_dist = np.uint8((area_dist / area_dist.max()) * 255)
+
       ret, area_su = cv2.threshold(area_dist, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
       ret, area_marks = cv2.connectedComponents(area_su)
       area_unknown = cv2.subtract(area_bg, area_su)
@@ -34,14 +45,8 @@ def get_marker_from_background(img, area_bg):
       area_marks[area_unknown == 255] = 0
       area_marks = cv2.watershed(img, area_marks)
 
-      fig = plt.figure(figsize=(10, 10))
-      ax = [fig.add_subplot(2, 2, 1),
-            fig.add_subplot(2, 2, 2),
-            fig.add_subplot(2, 2, 3),
-            fig.add_subplot(2, 2, 4)]
-      ax[0].imshow(cv2.merge((area_bg, area_bg, area_bg)))
+
       ax[1].imshow(cv2.merge((area_su, area_su, area_su)))
-      ax[2].imshow(cv2.merge((area_dist, area_dist, area_dist)))
       ax[3].imshow(area_marks)
       ax[0].axis('off')
       ax[1].axis('off')
@@ -58,15 +63,20 @@ def GetMarkerArea(img):
       l_c, a, b = cv2.split(lab)
       l_c = cv2.bilateralFilter(l_c, 15, 40, 80)
       area_bg = 255 - cv2.Canny(l_c, 100, 200)
-      kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-      area_bg = cv2.morphologyEx(area_bg, cv2.MORPH_OPEN, kernel, iterations=1)
+      #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+      #area_bg = cv2.morphologyEx(area_bg, cv2.MORPH_OPEN, kernel, iterations=1)
       area_marks0 = get_marker_from_background(img, area_bg)
 
       area_marks = area_marks0
-      area_marks[np.logical_and(area_marks != 1, area_marks != 0)] = 255
+      logicalarr0 = np.logical_and(area_marks != 1, area_marks != 0, area_marks != -1)
+      area_marks[logicalarr0] = 255
+      area_marks[np.logical_not(logicalarr0)] = 0
       area_bg1 = cv2.absdiff(area_marks.astype(np.uint8), area_bg)
       area_marks = get_marker_from_background(img, area_bg1)
-      print(area_bg.dtype)
+      logicalarr1 = np.logical_and(area_marks != 1, area_marks != 0, area_marks != -1)
+      area_marks0[logicalarr1] = area_marks[logicalarr1]
+      area_marks0 = area_marks
+      print(area_marks.dtype)
       print(np.max(area_bg1))
       print(np.max(area_bg1))
       fig = plt.figure(figsize=(10, 10))
