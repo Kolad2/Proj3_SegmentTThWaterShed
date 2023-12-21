@@ -62,7 +62,6 @@ print("Длинна: ",len(masks))
 
 mask_write_treads('Shape_test2/Shape', masks)
 
-exit()
 cv2.imwrite('test.tif', img)
 
 fig = plt.figure(figsize=(10, 10))
