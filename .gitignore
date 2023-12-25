@@ -1,10 +1,8 @@
 /includes/Pictures/
 /includes/RCF/
-/.idea/inspectionProfiles/profiles_settings.xml
-/.idea/.gitignore
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/Proj3_SegmentTThWaterShed.iml
-/.idea/vcs.xml
+/.idea/
 /test.tif
 /Shape_test2/
+/includes/models/RCFcheckpoint_epoch12.pth
+/includes/models/
+/result.pkl

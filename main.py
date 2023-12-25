@@ -1,11 +1,7 @@
 import os
 import sys
-from typing import Any
-
-from cv2 import Mat, UMat
-from numpy import ndarray, dtype, generic
-
 import PathCreator
+from typing import Any
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
@@ -15,6 +11,9 @@ import math
 from ListFiles import GetFiles
 from ShpMaskWriter import mask_write, mask_write_treads
 
+
+
+
 i_num = 0
 FileName = "B21-166b_cut.tif"
 Path0 = "includes/Pictures"
@@ -22,6 +21,9 @@ Path = Path0 + "/" + FileName
 img = cv2.imread(Path)  # Try houses.jpg or neurons.jpg
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 img = img[0:2 ** 9 - 1, 0:2 ** 9 - 1]
+
+
+
 
 
 class ThinSegmentation:
@@ -67,8 +69,40 @@ class ThinSegmentation:
             return area_marks
 
 
+from rsf_edges import modelini, get_model_edges
+from CannyTest import cannythresh
+
+"""model = modelini()
+result = get_model_edges(model, img)
+rsf_edges = result
+with open("result.pkl", "wb") as fp:
+    pickle.dump(result, fp)"""
+
 TS = ThinSegmentation(img)
 area_marks = TS.GetMarkerArea()
+
+print("load mask start")
+with open("result.pkl", "rb") as fp:
+    result = pickle.load(fp)
+print("load mask finish")
+edges = cannythresh(result)
+print(edges.min())
+print(edges.max())
+
+fig = plt.figure(figsize=(10, 10))
+ax = [fig.add_subplot(2, 2, 1),
+      fig.add_subplot(2, 2, 2),
+      fig.add_subplot(2, 2, 3),
+      fig.add_subplot(2, 2, 4)]
+ax[0].imshow(result, cmap=plt.get_cmap('gray'))
+ax[1].imshow(edges, cmap=plt.get_cmap('gray'))
+ax[2].imshow(img, cmap=plt.get_cmap('gray'))
+ax[3].imshow(TS.area_bg, cmap=plt.get_cmap('gray'))
+plt.show()
+exit()
+
+
+
 
 fig = plt.figure(figsize=(10, 10))
 ax = [fig.add_subplot(2, 2, 1),
@@ -78,18 +112,20 @@ ax = [fig.add_subplot(2, 2, 1),
 ax[0].imshow(TS.img, cmap=plt.get_cmap('gray'))
 print(TS.area_marks.min())
 ax[0].imshow(TS.area_marks, alpha=0.5)
-ax[1].imshow(TS.area_sure, cmap=plt.get_cmap('gray'))
-ax[1].imshow(cv2.subtract(TS.area_bg,TS.area_sure), cmap=plt.get_cmap('gray'))
+#ax[1].pcolormesh(TS.area_bg, cmap=plt.get_cmap('PuBu_r'))
+ax[1].imshow(cv2.subtract(TS.area_bg, TS.area_sure), cmap=plt.get_cmap('gray'))
 ax[2].imshow(TS.area_bg, cmap=plt.get_cmap('gray'))
 ax[2].imshow(TS.area_marks, alpha=0.5)
+ax[3].imshow(edges)
 ax[0].axis('off')
 ax[1].axis('off')
 ax[2].axis('off')
 ax[3].axis('off')
-ax[0].set_title("markers iteration 1")
-ax[1].set_title("sure foreground")
+ax[0].set_title("markers iteration")
+ax[1].set_title("sure $l_c$ foreground")
 plt.show()
 
+exit()
 
 masks = []
 for i in range(area_marks.max()):
