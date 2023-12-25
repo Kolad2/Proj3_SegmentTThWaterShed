@@ -6,4 +6,4 @@ sys.path.insert(0, Path_Root + "/" +
 sys.path.insert(0, Path_Root + "/" +
                 "includes")
 sys.path.insert(0, Path_Root + "/" +
-                "includes/segment-anything")
+                "includes/pyrsf-edges")
