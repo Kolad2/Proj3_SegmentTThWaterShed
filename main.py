@@ -12,9 +12,6 @@ from ListFiles import GetFiles
 from ShpMaskWriter import mask_write, mask_write_treads
 
 
-
-
-i_num = 0
 FileName = "B21-166b_cut.tif"
 Path0 = "includes/Pictures"
 Path = Path0 + "/" + FileName
@@ -89,13 +86,20 @@ edges = cannythresh(result)
 print(edges.min())
 print(edges.max())
 
+FileName = "B21-166b_lin_cut.tif"
+Path0 = "includes/Pictures"
+Path = Path0 + "/" + FileName
+img_lin = cv2.imread(Path)  # Try houses.jpg or neurons.jpg
+img_lin = img_lin[0:2 ** 9 - 1, 0:2 ** 9 - 1]
+img_lin[result < 0.1] = 0
+
 fig = plt.figure(figsize=(10, 10))
 ax = [fig.add_subplot(2, 2, 1),
       fig.add_subplot(2, 2, 2),
       fig.add_subplot(2, 2, 3),
       fig.add_subplot(2, 2, 4)]
 ax[0].imshow(result, cmap=plt.get_cmap('gray'))
-ax[1].imshow(edges, cmap=plt.get_cmap('gray'))
+ax[1].imshow(img_lin, cmap=plt.get_cmap('gray'))
 ax[2].imshow(img, cmap=plt.get_cmap('gray'))
 ax[3].imshow(TS.area_bg, cmap=plt.get_cmap('gray'))
 plt.show()

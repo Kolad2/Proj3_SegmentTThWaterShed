@@ -76,7 +76,7 @@ def load_pretrained(model, fname, optimizer=None):
     """
     if os.path.isfile(fname):
         print("=> loading checkpoint '{}'".format(fname))
-        checkpoint = torch.load(fname)
+        checkpoint = torch.load(fname,map_location=torch.device('cpu'))
         model.load_state_dict(checkpoint['state_dict'])
         if optimizer is not None:
             optimizer.load_state_dict(checkpoint['optimizer'])

@@ -13,6 +13,7 @@ import torchvision
 def modelini():
     path = os.path.dirname(os.path.realpath(__file__))
     model = models.RCF()
+    model.cpu()
     utils.load_pretrained(model, path + "/models/RCFcheckpoint_epoch12.pth")
     return model
 
