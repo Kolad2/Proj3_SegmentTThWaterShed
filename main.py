@@ -12,6 +12,7 @@ from ListFiles import GetFiles
 from ShpMaskWriter import mask_write, mask_write_treads
 
 
+#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 
 i_num = 0
@@ -72,11 +73,11 @@ class ThinSegmentation:
 from rsf_edges import modelini, get_model_edges
 from CannyTest import cannythresh
 
-"""model = modelini()
+model = modelini()
 result = get_model_edges(model, img)
 rsf_edges = result
 with open("result.pkl", "wb") as fp:
-    pickle.dump(result, fp)"""
+    pickle.dump(result, fp)
 
 TS = ThinSegmentation(img)
 area_marks = TS.GetMarkerArea()
