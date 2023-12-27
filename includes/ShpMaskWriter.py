@@ -54,7 +54,6 @@ def mask_write_treads(Path, masks):
     for i in range(len(masks)):
         tlist[i].join()
     for i in range(len(masks)):
-        print(i)
         if len(plist[i]) > 0:
             w.poly(plist[i])
             w.record("Polygon")

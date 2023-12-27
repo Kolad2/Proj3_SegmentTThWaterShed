@@ -101,8 +101,8 @@ def DFS(img) :
 
 def hysteresis_thresholding(
         img,
-        low_ratio=0.30,
-        high_ratio=0.50):
+        low_ratio=0.05,
+        high_ratio=0.1):
 
     diff = np.max(img) - np.min(img)
     t_low = np.min(img) + low_ratio * diff
@@ -148,7 +148,21 @@ def cannythresh(img):
     grad_dir = np.degrees(np.arctan2(y_grad, x_grad))
     closest_dir = closest_dir_function(grad_dir)
     img = non_maximal_suppressor(img, closest_dir)
-    img[img > 0.1] = 255
-    img[img < 1] = 0
-    #img = hysteresis_thresholding(img)
-    return img
+    img = hysteresis_thresholding(img)
+
+    #img[img < 0.1] = 0
+    #img[img >= 0.1] = 1
+    return np.uint8(img/img.max()*255)
+
+
+def cannythresh_grad(img, img2):
+    img = img/img.max()
+    x_grad = gradient_x(img2)
+    y_grad = gradient_y(img2)
+    grad_dir = np.degrees(np.arctan2(y_grad, x_grad))
+    closest_dir = closest_dir_function(grad_dir)
+    img = non_maximal_suppressor(img, closest_dir)
+    img = hysteresis_thresholding(img)
+    #img[img < 0.1] = 0
+    #img[img <= 0.1] = 0
+    return np.uint8(img/img.max()*255)

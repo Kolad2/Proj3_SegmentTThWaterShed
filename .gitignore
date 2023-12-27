@@ -1,8 +1,10 @@
 /includes/Pictures/
 /.idea/
-/test.tif
+/Shapes/Size_511.tif
 /Shape_test2/
 /includes/models/RCFcheckpoint_epoch12.pth
 /includes/models/
 /result.pkl
 /includes/Shapes/
+/deconvolution.py
+/test.py
