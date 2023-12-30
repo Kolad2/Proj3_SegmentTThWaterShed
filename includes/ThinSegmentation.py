@@ -8,6 +8,7 @@ import cv2
 import time
 import pickle
 import math
+from random import shuffle
 from ListFiles import GetFiles
 from ShpMaskWriter import mask_write, mask_write_treads
 from rsf_edges import modelini, get_model_edges
@@ -98,26 +99,20 @@ class ThinSegmentation:
             self.edges_w = np.empty(self.shape[0:2], dtype=np.float32)
             model = modelini()
             self.edges_w[:] = get_model_edges(model, self.img)
-        return self.edges_w
+        return self.edges_w.copy()
 
     def set_edge_prob(self, edges_w):
-        if self.edges_w is None:
-            self.edges_w = np.empty(self.shape[0:2], dtype=np.float32)
-        self.edges_w[:] = edges_w
+        self.edges_w = edges_w.copy()
 
-    def get_background_canny(self):
+    def get_bg_canny(self):
         self.img_gray = cv2.bilateralFilter(self.img_gray, 15, 40, 80)
         self.area_bg = 255 - cv2.Canny(self.img_gray, 100, 200)
-        return self.area_bg
-
-    def get_marker_canny(self):
-        self.area_bg = self.get_background_canny()
         self.edges_w = self.get_edge_prob()
         self.area_bg[self.edges_w < 0.1] = 255
         self.get_marker_from_background_iter()
         return self.area_marks
 
-    def get_marker_rsfcanny(self):
+    def get_bg_rsfcanny(self):
         #self.img_gray = cv2.bilateralFilter(self.img_gray, 15, 40, 80)
         self.edges_w = self.get_edge_prob()
         self.area_bg = 255 - cannythresh(self.edges_w)
@@ -125,18 +120,18 @@ class ThinSegmentation:
         self.get_marker_from_background_iter()
         return self.area_marks
 
-    def get_marker_rsfcannygrad(self):
+    def get_bg_rsfcannygrad(self):
         #self.img_gray = cv2.bilateralFilter(self.img_gray, 15, 40, 80)
         self.edges_w = self.get_edge_prob()
         self.area_bg = 255 - cannythresh_grad(self.edges_w, self.img_gray)
         self.area_bg[self.edges_w < 0.1] = 255
-        self.get_marker_from_background_iter()
         return self.area_marks
 
     def get_marks_areas(self):
         l = np.max(self.area_marks)
         S = [0]*l
         for i in range(1, l+1):
+            print(i)
             S[i-1] = np.sum(self.area_marks == i)
         return S
 
@@ -144,10 +139,17 @@ class ThinSegmentation:
         S = self.get_marks_areas()
         B = [0 if x <= th else 1 for x in S]
         for i in range(len(S)):
-            if(B[i] == 0):
+            if B[i] == 0:
                 self.area_marks[self.area_marks == i + 1] = 0
         #plt.hist([x for x in S if x < 200], bins=20)
         #plt.show()
+
+    def area_marks_shuffle(self):
+        l = np.max(self.area_marks)
+        numlist = [x for x in range(2,l+1)]
+        shuffle(numlist)
+        for i in range(l-1):
+            self.area_marks[self.area_marks == i + 2] = numlist[i]
 
     def get_masks(self):
         masks = []
