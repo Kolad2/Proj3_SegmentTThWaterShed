@@ -41,17 +41,9 @@ print("first seg start")
 TS1 = ThinSegmentation(img)
 TS1.set_edge_prob(result)
 print("get_bg_canny")
-TS1.get_bg_canny()
+#TS1.get_bg_canny()
+TS1.get_bg_rsfcanny()
 
-
-fig = plt.figure(figsize=(10, 10))
-ax = [fig.add_subplot(1, 1, 1)]
-#ax[0].imshow(TS1.img)
-#ax[0].imshow(TS1.area_marks, alpha=0.5, cmap=plt.get_cmap('tab20'))
-ax[0].imshow(TS1.area_dist, alpha=0.5, cmap=plt.get_cmap('gray'))
-plt.show()
-
-exit()
 print("get_marker_from_background_iter 1")
 TS1.get_marker_from_background_iter()
 print("get_marker_from_background_iter 2")
@@ -61,14 +53,17 @@ print("TS1.area_threshold(20)")
 print("TS1.marker_unbound_spread()")
 TS1.marker_unbound_spread()
 print("TS1.get_marks_areas()")
-TS1.get_marks_areas()
 
-
-
-
+#TS1.get_marks_areas()
 print("TS1.area_marks_shuffle()")
 TS1.area_marks_shuffle()
 print("fig = plt.figure(figsize=(10, 10))")
+
+fig = plt.figure(figsize=(10, 10))
+ax = [fig.add_subplot(2, 2, 1),fig.add_subplot(2, 2, 2)]
+ax[0].imshow(TS1.area_marks)
+ax[1].imshow(TS1.img)
+plt.show()
 
 exit()
 
@@ -80,8 +75,8 @@ img_lin = img_lin[0:2 ** 9 - 1, 0:2 ** 9 - 1]
 
 
 mask_write_treads('Shapes/Shape1/Shape', TS1.get_masks())
-mask_write_treads('Shapes/Shape2/Shape', TS2.get_masks())
-mask_write_treads('Shapes/Shape3/Shape', TS3.get_masks())
+#mask_write_treads('Shapes/Shape2/Shape', TS2.get_masks())
+#mask_write_treads('Shapes/Shape3/Shape', TS3.get_masks())
 cv2.imwrite('Shapes/Size_511.tif', img)
 exit()
 

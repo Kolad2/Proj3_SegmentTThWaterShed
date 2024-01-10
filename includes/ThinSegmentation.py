@@ -131,7 +131,6 @@ class ThinSegmentation:
         l = np.max(self.area_marks)
         S = [0]*l
         for i in range(1, l+1):
-            print(i)
             S[i-1] = np.sum(self.area_marks == i)
         return S
 
