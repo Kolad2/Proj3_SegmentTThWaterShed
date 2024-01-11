@@ -16,7 +16,10 @@ Path0 = "includes/Pictures"
 Path = Path0 + "/" + FileName
 img = cv2.imread(Path)  # Try houses.jpg or neurons.jpg
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-img = img[0:2 ** 9 - 1, 0:2 ** 9 - 1]
+#img = img[0:2 ** 9 - 1, 0:2 ** 9 - 1]
+print(img.shape)
+img = img[0:2 ** 12 - 1, 0:2 ** 12 - 1]
+print(img.shape)
 
 from rsf_edges import modelini, get_model_edges
 from CannyTest import cannythresh, cannythresh_grad
@@ -26,16 +29,18 @@ from scipy.spatial import cKDTree, KDTree
 
 
 
-"""model = modelini()
-result = get_model_edges(model, img)
-rsf_edges = result
-with open("result.pkl", "wb") as fp:
-    pickle.dump(result, fp)"""
+model = modelini()
+result_rsf = get_model_edges(model, img)
+exit()
+with open("result_full.pkl", "wb") as fp:
+    pickle.dump(result_rsf, fp)
+exit()
 
 print("load mask start")
 with open("result.pkl", "rb") as fp:
     result = pickle.load(fp)
 print("load mask finish")
+exit()
 
 print("first seg start")
 TS1 = ThinSegmentation(img)
@@ -60,9 +65,10 @@ TS1.area_marks_shuffle()
 print("fig = plt.figure(figsize=(10, 10))")
 
 fig = plt.figure(figsize=(10, 10))
-ax = [fig.add_subplot(2, 2, 1),fig.add_subplot(2, 2, 2)]
+ax = [fig.add_subplot(2, 2, 1),fig.add_subplot(2, 2, 2),fig.add_subplot(2, 2, 3)]
 ax[0].imshow(TS1.area_marks)
 ax[1].imshow(TS1.img)
+ax[2].imshow(cv2.merge((result,result,result)))
 plt.show()
 
 exit()

@@ -23,6 +23,7 @@ def pk(x1: int, y1: int, delta_x: int, delta_y: int):
 def line(x1: int, y1: int, x2: int, y2: int):
     delta_x = x2 - x1
     delta_y = y2 - y1
+    print(x1)
     if delta_x > delta_y:
         x_ar, y_ar = pk(x1, y1, delta_x, delta_y)
     else:
