@@ -6,5 +6,6 @@
 /includes/models/
 /result.pkl
 /includes/Shapes/
+/Shapes/
 /deconvolution.py
 /test.py
