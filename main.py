@@ -16,10 +16,14 @@ Path0 = "includes/Pictures"
 Path = Path0 + "/" + FileName
 img = cv2.imread(Path)  # Try houses.jpg or neurons.jpg
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-#img = img[0:2 ** 9 - 1, 0:2 ** 9 - 1]
-print(img.shape)
-img = img[0:2 ** 12 - 1, 0:2 ** 12 - 1]
-print(img.shape)
+img_line = cv2.imread(Path0 + "/" + "B21-166b_lin_cut.tif")
+
+print(img.shape, img_line.shape)
+img = img[0:2 ** 11 - 1, 0:2 ** 11 - 1]
+img_line = img_line[0:2 ** 11 - 1, 0:2 ** 11 - 1] #9
+print(img.shape, img_line.shape)
+r,g,b = cv2.split(img_line)
+result_line = r
 
 from rsf_edges import modelini, get_model_edges
 from CannyTest import cannythresh, cannythresh_grad
@@ -28,61 +32,81 @@ from ThinSegmentation import ThinSegmentation
 from scipy.spatial import cKDTree, KDTree
 
 
-
+"""
 model = modelini()
 result_rsf = get_model_edges(model, img)
-exit()
-with open("result_full.pkl", "wb") as fp:
-    pickle.dump(result_rsf, fp)
-exit()
 
+with open("result.pkl", "wb") as fp:
+    pickle.dump(result_rsf, fp)
+
+"""
+
+"""
 print("load mask start")
 with open("result.pkl", "rb") as fp:
-    result = pickle.load(fp)
+    result_rsf = pickle.load(fp)
 print("load mask finish")
-exit()
 
-print("first seg start")
-TS1 = ThinSegmentation(img)
-TS1.set_edge_prob(result)
-print("get_bg_canny")
-#TS1.get_bg_canny()
-TS1.get_bg_rsfcanny()
+TS0 = ThinSegmentation(img, result_rsf, result_line)
+TS1 = ThinSegmentation(img, result_rsf, result_line)
+TS2 = ThinSegmentation(img, result_rsf, result_line)
+TS3 = ThinSegmentation(img, result_rsf, result_line)
 
-print("get_marker_from_background_iter 1")
-TS1.get_marker_from_background_iter()
-print("get_marker_from_background_iter 2")
-TS1.get_marker_from_background_iter()
-print("TS1.area_threshold(20)")
-#TS1.area_threshold(20)
-print("TS1.marker_unbound_spread()")
-TS1.marker_unbound_spread()
-print("TS1.get_marks_areas()")
+"""
+#TS0.method0()
+#TS1.method1()
+#TS2.method2()
+#TS3.method3()
 
-#TS1.get_marks_areas()
-print("TS1.area_marks_shuffle()")
-TS1.area_marks_shuffle()
+"""
 print("fig = plt.figure(figsize=(10, 10))")
 
 fig = plt.figure(figsize=(10, 10))
-ax = [fig.add_subplot(2, 2, 1),fig.add_subplot(2, 2, 2),fig.add_subplot(2, 2, 3)]
-ax[0].imshow(TS1.area_marks)
-ax[1].imshow(TS1.img)
-ax[2].imshow(cv2.merge((result,result,result)))
+ax = [fig.add_subplot(2, 2, 1),fig.add_subplot(2, 2, 2),fig.add_subplot(2, 2, 3),fig.add_subplot(2, 2, 4)]
+ax[0].imshow(TS0.area_marks)
+ax[1].imshow(TS1.area_marks)
+ax[2].imshow(TS2.area_marks)
+ax[3].imshow(TS3.area_marks)
+"""
+
+"""
+S = TS1.get_marks_areas()
+
+with open("result_S.pkl", "wb") as fp:
+    pickle.dump(S, fp)
+
+"""
+
+print("load mask start")
+with open("result_S.pkl", "rb") as fp:
+    S = pickle.load(fp)
+print("load mask finish")
+
+
+
+fig = plt.figure(figsize=(10, 10))
+"""
+ax = [fig.add_subplot(2, 2, 1),
+      fig.add_subplot(2, 2, 2),
+      fig.add_subplot(2, 2, 3),
+      fig.add_subplot(2, 2, 4)]
+"""
+ax = [fig.add_subplot(1, 1, 1)]
+
+S = np.log(S)
+ax[0].hist(S)
+
+
 plt.show()
 
+
+
 exit()
-
-FileName = "B21-166b_lin_cut.tif"
-Path0 = "includes/Pictures"
-Path = Path0 + "/" + FileName
-img_lin = cv2.imread(Path)  # Try houses.jpg or neurons.jpg
-img_lin = img_lin[0:2 ** 9 - 1, 0:2 ** 9 - 1]
-
-
+mask_write_treads('Shapes/Shape0/Shape', TS0.get_masks())
 mask_write_treads('Shapes/Shape1/Shape', TS1.get_masks())
-#mask_write_treads('Shapes/Shape2/Shape', TS2.get_masks())
-#mask_write_treads('Shapes/Shape3/Shape', TS3.get_masks())
+mask_write_treads('Shapes/Shape2/Shape', TS2.get_masks())
+mask_write_treads('Shapes/Shape3/Shape', TS3.get_masks())
+
 cv2.imwrite('Shapes/Size_511.tif', img)
 exit()
 

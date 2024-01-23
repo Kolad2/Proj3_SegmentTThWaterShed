@@ -15,7 +15,7 @@ from rsf_edges import modelini, get_model_edges
 from CannyTest import cannythresh, cannythresh_grad
 
 class ThinSegmentation:
-    def __init__(self, img):
+    def __init__(self, img, edges_w=None, edges_line=None):
 
         self.img = img
         self.shape = img.shape
@@ -27,7 +27,8 @@ class ThinSegmentation:
         self.area_dist = None
         self.area_bg = np.empty(self.shape[0:2], dtype=np.uint8)
         self.area_marks = None
-        self.edges_w = None
+        self.edges_w = edges_w.copy()
+        self.edges_line = edges_line.copy()
 
     def watershed_iter(self, area_marks, area_bg=None):
         if area_bg is None:
@@ -94,6 +95,13 @@ class ThinSegmentation:
         self.area_unknown[:] = area_unknown
         return area_marks
 
+    def closes2segment(self, area_bg=None):
+        if area_bg is None:
+            area_bg = self.area_bg
+        ret, area_marks = cv2.connectedComponents(self.area_bg)
+        self.area_marks = area_marks + 1
+
+
     def get_edge_prob(self):
         if self.edges_w is None:
             self.edges_w = np.empty(self.shape[0:2], dtype=np.float32)
@@ -103,6 +111,9 @@ class ThinSegmentation:
 
     def set_edge_prob(self, edges_w):
         self.edges_w = edges_w.copy()
+
+    def set_edge_line(self, edges_line):
+        self.edges_line = edges_line.copy()
 
     def get_bg_canny(self):
         self.img_gray = cv2.bilateralFilter(self.img_gray, 15, 40, 80)
@@ -117,7 +128,6 @@ class ThinSegmentation:
         self.edges_w = self.get_edge_prob()
         self.area_bg = 255 - cannythresh(self.edges_w)
         self.area_bg[self.edges_w < 0.1] = 255
-        self.get_marker_from_background_iter()
         return self.area_marks
 
     def get_bg_rsfcannygrad(self):
@@ -127,11 +137,62 @@ class ThinSegmentation:
         self.area_bg[self.edges_w < 0.1] = 255
         return self.area_marks
 
+    def get_bg_rsfthin(self):
+        self.edges_w = self.get_edge_prob()
+        result = np.uint8((self.edges_w / self.edges_w.max()) * 255)
+        ret, result = cv2.threshold(result, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        result = cv2.ximgproc.thinning(result)
+        result = np.uint8((result / result.max()) * 255)
+        kernel = np.ones((2, 2), np.uint8)
+        result = cv2.dilate(result, kernel, iterations=1)
+        self.area_bg = 255 - result
+
+    def get_bg_rsfbald(self):
+        self.edges_w = self.get_edge_prob()
+        result = np.uint8((self.edges_w / self.edges_w.max()) * 255)
+        ret, result = cv2.threshold(result, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        #result = cv2.ximgproc.thinning(result)
+        result = np.uint8((result / result.max()) * 255)
+        kernel = np.ones((2, 2), np.uint8)
+        result = cv2.dilate(result, kernel, iterations=1)
+        self.area_bg = 255 - result
+
+    def add_bg_lineaments(self):
+        self.area_bg = 255 - cv2.add(255 - self.area_bg, self.edges_line)
+
+
+    def method0(self):
+        self.get_bg_rsfcanny()
+        print("self.get_marker_from_background_iter()")
+        self.get_marker_from_background_iter()
+        print("self.get_marker_from_background_iter()")
+        self.get_marker_from_background_iter()
+        print("marker_unbound_spread()")
+        self.marker_unbound_spread()
+
+    def method1(self):
+        self.get_bg_rsfbald()
+        self.add_bg_lineaments()
+        self.closes2segment()
+
+    def method2(self):
+        self.method1()
+        self.marker_unbound_spread()
+
+    def method3(self):
+        self.get_bg_rsfthin()
+        self.add_bg_lineaments()
+        self.get_marker_from_background_iter()
+        self.get_marker_from_background_iter()
+        self.marker_unbound_spread()
+
+
     def get_marks_areas(self):
         l = np.max(self.area_marks)
         S = [0]*l
         for i in range(1, l+1):
             S[i-1] = np.sum(self.area_marks == i)
+        S = np.array(S)
         return S
 
     def area_threshold(self, th: int):
@@ -140,8 +201,7 @@ class ThinSegmentation:
         for i in range(len(S)):
             if B[i] == 0:
                 self.area_marks[self.area_marks == i + 1] = 0
-        #plt.hist([x for x in S if x < 200], bins=20)
-        #plt.show()
+
 
     def area_marks_shuffle(self):
         l = np.max(self.area_marks)
@@ -164,3 +224,4 @@ class ThinSegmentation:
                 mask['bbox'] = (x_min, y_min, x_max - x_min + 1, y_max - y_min + 1)
                 masks.append(mask)
         return masks
+
