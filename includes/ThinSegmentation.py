@@ -27,8 +27,15 @@ class ThinSegmentation:
         self.area_dist = None
         self.area_bg = np.empty(self.shape[0:2], dtype=np.uint8)
         self.area_marks = None
-        self.edges_w = edges_w.copy()
-        self.edges_line = edges_line.copy()
+        if edges_w is not None:
+            self.edges_w = edges_w.copy()
+        else:
+            self.edges_w = None
+        if edges_line is not None:
+            self.edges_line = edges_line.copy()
+        else:
+            self.edges_line = None
+
 
     def watershed_iter(self, area_marks, area_bg=None):
         if area_bg is None:
@@ -162,6 +169,7 @@ class ThinSegmentation:
 
 
     def method0(self):
+        print("self.get_bg_rsfcanny()")
         self.get_bg_rsfcanny()
         print("self.get_marker_from_background_iter()")
         self.get_marker_from_background_iter()
@@ -191,6 +199,7 @@ class ThinSegmentation:
         l = np.max(self.area_marks)
         S = [0]*l
         for i in range(1, l+1):
+            print(i)
             S[i-1] = np.sum(self.area_marks == i)
         S = np.array(S)
         return S
