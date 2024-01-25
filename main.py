@@ -40,8 +40,8 @@ n = 9
 start_img = False
 b_shapewrite = False
 #
-#img = img[0:2 ** n, 0:2 ** n]
-#result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
+img = img[0:2 ** n, 0:2 ** n]
+result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
 #result_line = result_line[0:2 ** n, 0:2 ** n]
 
 if start_img:
@@ -57,6 +57,33 @@ if start_img:
 
 TS0 = ThinSegmentation(img, result_rsf)
 TS0.method0()
+TS1 = ThinSegmentation(img, result_rsf)
+TS1.method0_1()
+
+fig = plt.figure(figsize=(10, 10))
+ax = [fig.add_subplot(2, 2, 1),
+      fig.add_subplot(2, 2, 2),
+      fig.add_subplot(2, 2, 3),
+      fig.add_subplot(2, 2, 4)]
+ax[0].imshow(cv2.merge((TS0.area_bg,TS0.area_bg,TS0.area_bg)))
+ax[1].imshow(cv2.merge((TS1.area_bg,TS1.area_bg,TS1.area_bg)))
+ax[2].imshow(img)
+ax[3].imshow(cv2.merge((result_rsf,result_rsf,result_rsf)))
+plt.show()
+
+
+
+if b_shapewrite:
+    mask_write_treads('Shapes/Shape0/Shape0', TS0.get_masks())
+    mask_write_treads('Shapes/Shape1/Shape1', TS1.get_masks())
+    #mask_write_treads('Shapes/Shape2/Shape2', TS2.get_masks())
+    #mask_write_treads('Shapes/Shape3/Shape3', TS3.get_masks())
+    cv2.imwrite("Shapes/img.tif", img)
+
+
+
+
+exit()
 print("TS0.get_marks_areas()")
 S = TS0.get_marks_areas()
 print("pickle")
@@ -92,13 +119,5 @@ plt.show()
 
 """
 
-"""
-if b_shapewrite:
-    mask_write_treads('Shapes/Shape0/Shape0', TS0.get_masks())
-    mask_write_treads('Shapes/Shape1/Shape1', TS1.get_masks())
-    mask_write_treads('Shapes/Shape2/Shape2', TS2.get_masks())
-    mask_write_treads('Shapes/Shape3/Shape3', TS3.get_masks())
-    cv2.imwrite("Shapes/img.tif", img)
 
-"""
 exit()

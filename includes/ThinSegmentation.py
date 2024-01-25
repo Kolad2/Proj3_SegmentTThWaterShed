@@ -164,6 +164,25 @@ class ThinSegmentation:
         result = cv2.dilate(result, kernel, iterations=1)
         self.area_bg = 255 - result
 
+    def get_bg_rsf_skeleton_base(self):
+        self.edges_w = self.get_edge_prob()
+        edges_w = np.uint8((self.edges_w / self.edges_w.max()) * 255)
+        edges_0 = np.zeros(edges_w.shape, np.uint8)
+        for i in range(1, 255):
+            kernel = np.ones((3, 3), np.uint8)
+            ret, result_bin = cv2.threshold(edges_w, i, 255, cv2.THRESH_BINARY)
+            result_bin = cv2.erode(result_bin, kernel, iterations=1)
+            result_erod = cv2.erode(result_bin, kernel, iterations=1)
+            result_erod = cv2.subtract(result_bin, result_erod)
+            result_bin = cv2.add(result_bin, edges_0)
+            edges = cv2.ximgproc.thinning(result_bin)
+            edges = cv2.subtract(edges, 255 - result_erod)
+            edges_0 = cv2.add(edges_0, edges)
+        self.area_bg = 255 - edges_0
+
+
+
+
     def add_bg_lineaments(self):
         self.area_bg = 255 - cv2.add(255 - self.area_bg, self.edges_line)
 
@@ -177,6 +196,16 @@ class ThinSegmentation:
         self.get_marker_from_background_iter()
         print("marker_unbound_spread()")
         self.marker_unbound_spread()
+
+    def method0_1(self):
+        print("self.get_bg_rsf_skeleton_base()")
+        self.get_bg_rsf_skeleton_base()
+        print("self.get_marker_from_background_iter()")
+        self.get_marker_from_background_iter()
+        print("self.get_marker_from_background_iter()")
+        self.get_marker_from_background_iter()
+        print("marker_unbound_spread()")
+        #self.marker_unbound_spread()
 
     def method1(self):
         self.get_bg_rsfbald()
