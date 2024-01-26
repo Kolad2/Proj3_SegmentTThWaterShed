@@ -16,7 +16,10 @@ from ThinSegmentation import ThinSegmentation
 from scipy.spatial import cKDTree, KDTree
 
 
-FileName = "B21-166b"
+#FileName = "B21-166b"
+#FileName = "B21-122a"
+#FileName = "B21-120a"
+#FileName = "B21-51a"
 Path0 = "/media/kolad/HardDisk/ThinSection"
 Path_dir = Path0 + "/" + FileName + "/"
 Path_img = Path_dir + "Picture" + "/" + FileName  + ".tif"
@@ -32,16 +35,16 @@ Path_rsf = Path_dir + "RSF_edges" + "/" + FileName + "_edges_cut.tif"
 img_rsf = cv2.imread(Path_rsf)
 result_rsf,_,_ = cv2.split(img_rsf)
 # Lineaments load
-"""Path_line = Path_dir + "Lineaments" + "/" + FileName + "_lin_cut.tif"
+Path_line = Path_dir + "Lineaments" + "/" + FileName + "_lin_cut.tif"
 img_line = cv2.imread(Path_line)
-result_line,_,_ = cv2.split(img_line)"""
+result_line,_,_ = cv2.split(img_line)
 #
 n = 9
 start_img = False
 b_shapewrite = False
 #
-img = img[0:2 ** n, 0:2 ** n]
-result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
+#img = img[0:2 ** n, 0:2 ** n]
+#result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
 #result_line = result_line[0:2 ** n, 0:2 ** n]
 
 if start_img:
@@ -55,11 +58,19 @@ if start_img:
     #plt.show()
 
 
-TS0 = ThinSegmentation(img, result_rsf)
-TS0.method0()
-TS1 = ThinSegmentation(img, result_rsf)
-TS1.method0_1()
+TS0 = ThinSegmentation(img, result_rsf, result_line)
+TS0.method2()
+S = TS0.get_marks_areas()
+print(S)
+with open("temp/" + FileName + "_S.pickle", 'wb') as handle:
+    pickle.dump(S, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+
+
+exit()
+#TS1 = ThinSegmentation(img, result_rsf)
+#TS1.method0_1()
+"""
 fig = plt.figure(figsize=(10, 10))
 ax = [fig.add_subplot(2, 2, 1),
       fig.add_subplot(2, 2, 2),
@@ -71,7 +82,7 @@ ax[2].imshow(img)
 ax[3].imshow(cv2.merge((result_rsf,result_rsf,result_rsf)))
 plt.show()
 
-
+"""
 
 if b_shapewrite:
     mask_write_treads('Shapes/Shape0/Shape0', TS0.get_masks())
@@ -87,8 +98,7 @@ exit()
 print("TS0.get_marks_areas()")
 S = TS0.get_marks_areas()
 print("pickle")
-with open("temp/" + FileName + "_S.pickle", 'wb') as handle:
-    pickle.dump(S, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 
 

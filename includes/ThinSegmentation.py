@@ -225,13 +225,9 @@ class ThinSegmentation:
 
 
     def get_marks_areas(self):
-        l = np.max(self.area_marks)
-        S = [0]*l
-        for i in range(1, l+1):
-            print(i)
-            S[i-1] = np.sum(self.area_marks == i)
-        S = np.array(S)
-        return S
+        print("np.unique(self.area_marks, return_counts=True)")
+        unique, counts = np.unique(self.area_marks, return_counts=True)
+        return counts[2:-1]
 
     def area_threshold(self, th: int):
         S = self.get_marks_areas()
