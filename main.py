@@ -19,7 +19,7 @@ from scipy.spatial import cKDTree, KDTree
 #FileName = "B21-166b"
 #FileName = "B21-122a"
 #FileName = "B21-120a"
-#FileName = "B21-51a"
+FileName = "B21-51a"
 Path0 = "/media/kolad/HardDisk/ThinSection"
 Path_dir = Path0 + "/" + FileName + "/"
 Path_img = Path_dir + "Picture" + "/" + FileName  + ".tif"
@@ -39,13 +39,13 @@ Path_line = Path_dir + "Lineaments" + "/" + FileName + "_lin_cut.tif"
 img_line = cv2.imread(Path_line)
 result_line,_,_ = cv2.split(img_line)
 #
-n = 9
+n = 12
 start_img = False
 b_shapewrite = False
 #
-#img = img[0:2 ** n, 0:2 ** n]
-#result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
-#result_line = result_line[0:2 ** n, 0:2 ** n]
+img = img[0:2 ** n, 0:2 ** n]
+result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
+result_line = result_line[0:2 ** n, 0:2 ** n]
 
 if start_img:
     fig = plt.figure(figsize=(10, 10))
@@ -60,29 +60,33 @@ if start_img:
 
 TS0 = ThinSegmentation(img, result_rsf, result_line)
 TS0.method2()
-S = TS0.get_marks_areas()
-print(S)
-with open("temp/" + FileName + "_S.pickle", 'wb') as handle:
-    pickle.dump(S, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
+#S = TS0.get_marks_areas()
+TS0.get_something()
 
 
 exit()
+"""
+with open("temp/" + FileName + "_S.pickle", 'wb') as handle:
+    pickle.dump(S, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+"""
+
+
 #TS1 = ThinSegmentation(img, result_rsf)
 #TS1.method0_1()
-"""
+
 fig = plt.figure(figsize=(10, 10))
 ax = [fig.add_subplot(2, 2, 1),
       fig.add_subplot(2, 2, 2),
       fig.add_subplot(2, 2, 3),
       fig.add_subplot(2, 2, 4)]
 ax[0].imshow(cv2.merge((TS0.area_bg,TS0.area_bg,TS0.area_bg)))
-ax[1].imshow(cv2.merge((TS1.area_bg,TS1.area_bg,TS1.area_bg)))
-ax[2].imshow(img)
-ax[3].imshow(cv2.merge((result_rsf,result_rsf,result_rsf)))
+#ax[1].imshow(cv2.merge((TS1.area_bg,TS1.area_bg,TS1.area_bg)))
+ax[1].imshow(img)
+#ax[3].imshow(cv2.merge((result_rsf,result_rsf,result_rsf)))
 plt.show()
+exit()
 
-"""
 
 if b_shapewrite:
     mask_write_treads('Shapes/Shape0/Shape0', TS0.get_masks())

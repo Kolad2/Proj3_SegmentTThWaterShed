@@ -57,6 +57,8 @@ with open("temp/" + FileName + "_S.pickle", "rb") as fp:
     S = pickle.load(fp)
 print("load mask finish")
 
+print(len(S))
+exit()
 mask = S > 10
 #S = S[mask]
 
