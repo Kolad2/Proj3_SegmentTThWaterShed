@@ -229,6 +229,12 @@ class ThinSegmentation:
         unique, counts = np.unique(self.area_marks, return_counts=True)
         return counts[2:-1]
 
+    def get_marks_perimetr(self):
+        masks = self.get_masks()
+        for mask in masks:
+            contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+
     def get_something(self):
         print("sort")
         i_s = np.argsort(self.area_marks,axis=None)
