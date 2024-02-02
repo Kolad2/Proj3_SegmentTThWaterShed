@@ -227,7 +227,6 @@ class ThinSegmentation:
     def get_marks_areas(self):
         print("np.unique(self.area_marks, return_counts=True)")
         unique, counts = np.unique(self.area_marks, return_counts=True)
-
         return counts[2:-1]
 
     def get_something(self):
