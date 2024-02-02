@@ -235,23 +235,19 @@ class ThinSegmentation:
         i_s = np.argsort(self.area_marks,axis=None)
         unique, counts = np.unique(self.area_marks, return_counts=True)
         counts = np.insert(counts,0,0)
-        cumcounts = counts.cumsum()
+        ccnts = counts.cumsum()
         row, col = np.indices(self.area_marks.shape)
         marks = self.area_marks.flatten()[i_s]
         row = row.flatten()[i_s]
         col = col.flatten()[i_s]
-        xC = sum(col[cumcounts[0]:cumcounts[1]])/counts[1]
-        yC = sum(row[cumcounts[0]:cumcounts[1]])/counts[1]
-        Jxx = sum((col[cumcounts[0]:cumcounts[1]] - xC) ** 2)/counts[1]
-        Jyy = sum((row[cumcounts[0]:cumcounts[1]] - yC) ** 2)/counts[1]
-        Jxy = sum((row[cumcounts[0]:cumcounts[1]] - yC) * (col[cumcounts[0]:cumcounts[1]] - xC))/counts[1]
-        print(Jxx,Jyy,Jxy)
-        print(xC,yC)
-        print(marks[cumcounts[0]:cumcounts[1]])
-        print(row[cumcounts[0]:cumcounts[1]])
-        print(col[cumcounts[0]:cumcounts[1]])
-        print(i_s)
-
+        for i in range(0,len(counts)):
+            xC[i] = sum(col[ccnts[i]:ccnts[i+1]]) / counts[i]
+            yC[i] = sum(row[ccnts[i]:ccnts[i+1]]) / counts[i]
+            Jxx[i] = sum((col[ccnts[i]:ccnts[i+1]] - xC) ** 2) / counts[i]
+            Jyy[i] = sum((row[ccnts[i]:ccnts[i+1]] - yC) ** 2) / counts[i]
+            Jxy[i] = sum((row[ccnts[i]:ccnts[i+1]] - yC) * (col[ccnts[i]:ccnts[i+1]] - xC)) / counts[i]
+            Jeig[i] = np.linalg.eig(np.array([[Jxx[i], Jxy[i]], [Jxy[i], Jyy[i]]]))
+        return Jeig
 
     def area_threshold(self, th: int):
         S = self.get_marks_areas()
