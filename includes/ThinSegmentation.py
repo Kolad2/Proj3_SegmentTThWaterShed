@@ -245,14 +245,16 @@ class ThinSegmentation:
         marks = self.area_marks.flatten()[i_s]
         row = row.flatten()[i_s]
         col = col.flatten()[i_s]
-        for i in range(0,len(counts)):
-            xC[i] = sum(col[ccnts[i]:ccnts[i+1]]) / counts[i]
-            yC[i] = sum(row[ccnts[i]:ccnts[i+1]]) / counts[i]
-            Jxx[i] = sum((col[ccnts[i]:ccnts[i+1]] - xC) ** 2) / counts[i]
-            Jyy[i] = sum((row[ccnts[i]:ccnts[i+1]] - yC) ** 2) / counts[i]
-            Jxy[i] = sum((row[ccnts[i]:ccnts[i+1]] - yC) * (col[ccnts[i]:ccnts[i+1]] - xC)) / counts[i]
-            Jeig[i] = np.linalg.eig(np.array([[Jxx[i], Jxy[i]], [Jxy[i], Jyy[i]]]))
-        return Jeig
+        Jeig_result = []
+        for i in range(0,len(counts)-1):
+            xC = sum(col[ccnts[i]:ccnts[i+1]]) / counts[i+1]
+            yC = sum(row[ccnts[i]:ccnts[i+1]]) / counts[i+1]
+            Jxx = sum((col[ccnts[i]:ccnts[i+1]] - xC) ** 2) / counts[i+1]
+            Jyy = sum((row[ccnts[i]:ccnts[i+1]] - yC) ** 2) / counts[i+1]
+            Jxy = sum((row[ccnts[i]:ccnts[i+1]] - yC) * (col[ccnts[i]:ccnts[i+1]] - xC)) / counts[i+1]
+            Jeig = np.linalg.eig(np.array([[Jxx, Jxy], [Jxy, Jyy]]))
+            Jeig_result.append(Jeig)
+        return Jeig_result
 
     def area_threshold(self, th: int):
         S = self.get_marks_areas()

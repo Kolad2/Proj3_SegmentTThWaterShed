@@ -19,7 +19,11 @@ from scipy.spatial import cKDTree, KDTree
 #FileName = "B21-166b"
 #FileName = "B21-122a"
 #FileName = "B21-120a"
-FileName = "B21-51a"
+#FileName = "B21-51a"
+#FileName = "B21-200b"
+#FileName = "B21-192b"
+FileName = "19-5b"
+
 Path0 = "/media/kolad/HardDisk/ThinSection"
 Path_dir = Path0 + "/" + FileName + "/"
 Path_img = Path_dir + "Picture" + "/" + FileName  + ".tif"
@@ -60,17 +64,17 @@ if start_img:
 
 TS0 = ThinSegmentation(img, result_rsf, result_line)
 TS0.method2()
-#S = TS0.get_marks_areas()
-TS0.get_something()
+S = TS0.get_marks_areas()
+#TS0.get_something()
 
 
-exit()
-"""
+
+
 with open("temp/" + FileName + "_S.pickle", 'wb') as handle:
     pickle.dump(S, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-"""
 
+exit()
 
 #TS1 = ThinSegmentation(img, result_rsf)
 #TS1.method0_1()

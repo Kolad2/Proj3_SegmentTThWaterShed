@@ -8,8 +8,13 @@ import pickle
 
 #FileName = "B21-166b"
 #FileName = "B21-122a"
-FileName = "B21-120a"
+#FileName = "B21-120a"
 #FileName = "B21-51a"
+#FileName = "B21-200b"
+#FileName = "B21-192b"
+FileName = "19-5b"
+
+
 Path0 = "/media/kolad/HardDisk/ThinSection"
 Path_dir = Path0 + "/" + FileName + "/"
 Path_shape = Path_dir + "Joined/" + FileName + "_joined"

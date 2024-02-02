@@ -10,7 +10,8 @@ from CannyTest import cannythresh, cannythresh_grad
 from ThinSegmentation import ThinSegmentation
 
 
-FileName = "B21-166b"
+#FileName = "B21-166b"
+#FileName = "B21-200b"
 Path0 = "/media/kolad/HardDisk/ThinSection"
 Path_dir = Path0 + "/" + FileName + "/"
 Path_img = Path_dir + "Picture" + "/" + FileName  + ".tif"
