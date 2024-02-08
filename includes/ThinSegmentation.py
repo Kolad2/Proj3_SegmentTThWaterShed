@@ -234,8 +234,7 @@ class ThinSegmentation:
         for mask in masks:
             contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-
-    def get_something(self):
+    def get_momentum(self):
         print("sort")
         i_s = np.argsort(self.area_marks,axis=None)
         unique, counts = np.unique(self.area_marks, return_counts=True)
@@ -249,12 +248,45 @@ class ThinSegmentation:
         for i in range(0,len(counts)-1):
             xC = sum(col[ccnts[i]:ccnts[i+1]]) / counts[i+1]
             yC = sum(row[ccnts[i]:ccnts[i+1]]) / counts[i+1]
-            Jxx = sum((col[ccnts[i]:ccnts[i+1]] - xC) ** 2) / counts[i+1]
-            Jyy = sum((row[ccnts[i]:ccnts[i+1]] - yC) ** 2) / counts[i+1]
+            Jxx = sum(1/8 + (col[ccnts[i]:ccnts[i+1]] - xC) ** 2)
+            Jyy = sum(1/8 + (row[ccnts[i]:ccnts[i+1]] - yC) ** 2)
             Jxy = sum((row[ccnts[i]:ccnts[i+1]] - yC) * (col[ccnts[i]:ccnts[i+1]] - xC)) / counts[i+1]
-            Jeig = np.linalg.eig(np.array([[Jxx, Jxy], [Jxy, Jyy]]))
-            Jeig_result.append(Jeig)
-        return Jeig_result
+            #Jeig = np.linalg.eig(np.array([[Jxx, Jxy], [Jxy, Jyy]]))
+            #Jeig_result.append(Jeig)
+        return Jxx, Jyy, Jxy, xC, yC
+
+    def get_something(self):
+        masks = []
+        area_marks = self.area_marks
+        P = []
+        for i in range(area_marks.max()):
+            print(i,area_marks.max())
+            mask = {'segmentation': area_marks == i, 'bbox': (0, 0, 0, 0)}
+            segmentation = np.where(mask['segmentation'])
+            if len(segmentation) != 0 and len(segmentation[1]) != 0 and len(segmentation[0]) != 0:
+                x_min = int(np.min(segmentation[1]))
+                x_max = int(np.max(segmentation[1]))
+                y_min = int(np.min(segmentation[0]))
+                y_max = int(np.max(segmentation[0]))
+                mask['bbox'] = (x_min, y_min, x_max - x_min + 1, y_max - y_min + 1)
+                masks.append(mask)
+            G = mask['segmentation'][
+                mask['bbox'][1]:mask['bbox'][1] + mask['bbox'][3],
+                mask['bbox'][0]:mask['bbox'][0] + mask['bbox'][2]]
+            G = np.uint8(G)
+            G2 = np.zeros((G.shape[0]+2,G.shape[1]+2),'uint8')
+            G2[1:-1,1:-1] = G
+            G = G2
+            kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], 'uint8')
+            G2 = cv2.dilate(G2, kernel, iterations=1)
+            contours, hierarchy = cv2.findContours(G2, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+            P0 = 0
+            for contour in contours:
+                c = contour.reshape((contour.shape[0], 2)) * [1, -1]
+                P0 = P0 + len(c)
+            P.append(P0)
+        return P
+
 
     def area_threshold(self, th: int):
         S = self.get_marks_areas()

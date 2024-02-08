@@ -6,13 +6,26 @@ from Shpreader import get_shp_poly
 from Bresenham_Algorithm import line as line_BA
 import pickle
 
+#FileName = "B21-234a"
+#FileName = "B21-215b"
+#FileName = "B21-215a"
+#FileName = "B21-213b"
+#FileName = "B21-213a"
+#FileName = "B21-189b"
+#FileName = "B21-188b_2"
+#FileName = "B21-151b"
+#FileName = "B21-107b"
+#FileName = "64-3"
+#FileName = "15-2"
+#FileName = "15-1"
+#
 #FileName = "B21-166b"
 #FileName = "B21-122a"
 #FileName = "B21-120a"
 #FileName = "B21-51a"
 #FileName = "B21-200b"
 #FileName = "B21-192b"
-FileName = "19-5b"
+#FileName = "19-5b"
 
 
 Path0 = "/media/kolad/HardDisk/ThinSection"

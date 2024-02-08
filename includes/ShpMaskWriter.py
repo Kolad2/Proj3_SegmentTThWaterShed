@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 def get_mask2polygon(mask, bbox = [0,0,0,0]):
     polygon = []
-    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_TC89_KCOS)
     for contour, h_vec in zip(contours, hierarchy[0]):
         c = contour.reshape((contour.shape[0], 2)) * [1, -1] + [bbox[0], -bbox[1]]
         c = c.tolist()
