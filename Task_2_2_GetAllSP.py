@@ -60,6 +60,6 @@ for FileName in FileNames:
 	result_line,_,_ = cv2.split(img_line)
 	TS = ThinSegmentation(img, result_rsf, result_line)
 	TS.method2()
-	S, P = TS0.get_SP()
+	S, P = TS.get_SP()
 	dict = {'S': S, 'P': P}
 	scipy.io.savemat("temp/" + FileName + "_S.mat", dict)
