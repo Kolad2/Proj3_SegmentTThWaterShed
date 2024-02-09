@@ -62,4 +62,4 @@ for FileName in FileNames:
 	TS.method2()
 	S, P = TS.get_SP()
 	dict = {'S': S, 'P': P}
-	scipy.io.savemat("temp/" + FileName + "_S.mat", dict)
+	scipy.io.savemat("temp/StatisticData/" + FileName + "_S.mat", dict)

@@ -44,7 +44,9 @@ FileName = FileNames[16]
 
 matdict = scipy.io.loadmat("temp/StatisticData/" + FileName + "_S.mat")
 S = matdict['S'][0]
+P = matdict['P'][0]
 
+exit()
 pl = 2.5
 pl2 = (pl)**2
 """
