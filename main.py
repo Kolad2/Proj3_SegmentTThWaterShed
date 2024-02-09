@@ -80,18 +80,12 @@ if start_img:
 TS0 = ThinSegmentation(img, result_rsf, result_line)
 TS0.method2()
 #S = TS0.get_marks_areas()
-TS0.get_something()
+S, P = TS0.get_SP()
 
-exit()
-dict1 = {'S': S}
-print("TS0.get_momentum()")
-Jxx, Jyy, Jxy,_,_ = TS0.get_momentum()
-dict2 = {'Jxx':Jxx, 'Jyy':Jyy, 'Jxy':Jxy}
-
-dict = {**dict1, **dict2}
+dict = {'S': S, 'P': P}
 scipy.io.savemat("temp/" + FileName + "_S.mat", dict)
 
-
+exit()
 
 
 #TS1 = ThinSegmentation(img, result_rsf)
