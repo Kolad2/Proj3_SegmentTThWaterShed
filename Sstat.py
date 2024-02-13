@@ -2,7 +2,6 @@ import os
 import sys
 
 import scipy.io
-
 import PathCreator
 from typing import Any
 import numpy as np
@@ -11,6 +10,7 @@ import cv2
 import time
 import pickle
 import math
+from scipy.stats._continuous_distns import lognorm_gen
 from scipy.ndimage import histogram
 from scipy import stats as st
 from scipy.special import factorial
@@ -19,6 +19,7 @@ import scipy.stats as st
 import scipy.optimize as opt
 from ListFiles import GetFiles
 from ShpMaskWriter import mask_write, mask_write_treads
+from scipy.optimize import minimize, rosen, rosen_der
 
 FileNames = ["B21-234a",    #0
              "B21-215b",    #1
@@ -39,16 +40,98 @@ FileNames = ["B21-234a",    #0
              "B21-200b",    #16
              "B21-192b",    #17
              "19-5b"]       #18
-FileName = FileNames[10]
+FileName = FileNames[0]
 FileName = FileNames[16]
+xmin = 20
 
 matdict = scipy.io.loadmat("temp/StatisticData/" + FileName + "_S.mat")
 S = matdict['S'][0]
 P = matdict['P'][0]
+S = S[2:]
+P = P[2:]
+hS = np.empty(len(S), dtype=float)
+for i in range(0,len(S)):
+    hS[i] = S[i] + P[i]/2 #+ np.sum(st.uniform.rvs(size=P[i]))
+hS = hS[hS > xmin]
+u, c = np.unique(hS, return_counts=True)
+bins = np.empty(len(u)+2, dtype=float)
+counts = np.empty(len(c)+1, dtype=float)
+bins[0] = 0; bins[1:-1] = u; bins[-1] = 10**10
+c = np.cumsum(c)
+counts[0] = 0; counts[1:] = c
+F_0 = counts/counts[-1]
+
+log_bins = xmin*np.logspace(0,10,160,base=2)
+f_0,_ = np.histogram(hS, bins=log_bins, density=True)
+
+
+def target_lognorm(s, scale, X, xmin):
+    dist = st.lognorm(s, 0, scale)
+    Fmin = dist.cdf(xmin)
+    return -np.sum(np.log(dist.pdf(X)/(1 - Fmin)))
+
+
+def target_expon(scale, X, xmin):
+    Fmin = 1 - np.exp(xmin/scale)
+    S = -(np.sum(-X/scale) - len(X)*np.log(scale) - len(X)*np.log(1 - Fmin))
+    return S
+
+def f_lognorm(x):
+    return target_lognorm(x[0], x[1], hS, xmin)
+
+def f_expon(x):
+    return target_expon(x, hS, xmin)
+
+def GetThetaLognorm():
+    theta = st.lognorm.fit(hS, floc=0)
+    res = minimize(f_lognorm, [theta[0], theta[2]], method='Nelder-Mead', tol=1e-6)
+    return res.x[0], 0, res.x[1]
+
+def GetThetaExpon():
+    theta = st.expon.fit(hS, floc=0)
+    res = minimize(f_expon, theta[1], method='Nelder-Mead', tol=1e-6)
+    return 0, res.x[0]
+
+
+theta = [[] for i in range(0,2)]
+dist = [[] for i in range(0,2)]
+F = [[] for i in range(0,2)]
+f = [[] for i in range(0,2)]
+theta[0] = GetThetaLognorm()
+theta[1] = GetThetaExpon();print(theta[1])
+
+
+dist[0] = st.lognorm(theta[0][0], 0, theta[0][2])
+dist[1] = st.expon(0, theta[1][1])
+
+for i in range(0,2):
+    F[i] = (dist[i].cdf(log_bins) - dist[i].cdf(xmin))/(1 - dist[i].cdf(xmin))
+    f[i] = (dist[i].pdf(log_bins))/(1 - dist[i].cdf(xmin))
+
+
+#K1 = max(np.abs(F_0[1:] - F_1))
+#print(K1)
+
+fig = plt.figure(figsize=(20, 10))
+ax = [fig.add_subplot(1, 2, 1), fig.add_subplot(1, 2, 2)]
+ax[0].set_xscale('log')
+ax[0].stairs(F_0, bins, fill=True)
+ax[0].plot(log_bins, F[0],color='b')
+ax[0].plot(log_bins, F[1],color='b')
+
+ax[1].set_xscale('log')
+#ax[1].set_yscale('log')
+ax[1].stairs(f_0, log_bins, fill=True)
+ax[1].plot(log_bins, f[0],color='b')
+ax[1].plot(log_bins, f[1],color='r')
+plt.show()
+
+
 
 exit()
 pl = 2.5
 pl2 = (pl)**2
+
 """
 log_bins = np.logspace(0,30,30,base=2)
 f_0, bins = np.histogram(S,bins= log_bins, density=False)
@@ -63,8 +146,6 @@ ax[0].set_yscale('log')
 ax[0].stairs(f_0, log_bins, fill=True)
 plt.show()
 exit()
-
-
 """
 
 
