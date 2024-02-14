@@ -104,13 +104,24 @@ theta[1] = GetThetaExpon();print(theta[1])
 dist[0] = st.lognorm(theta[0][0], 0, theta[0][2])
 dist[1] = st.expon(0, theta[1][1])
 
+def get_cdfcor(dist, X, xmin):
+    return (dist.cdf(X) - dist.cdf(xmin)) / (1 - dist.cdf(xmin))
+
 for i in range(0,2):
-    F[i] = (dist[i].cdf(log_bins) - dist[i].cdf(xmin))/(1 - dist[i].cdf(xmin))
+    F[i] = get_cdfcor(dist[i], log_bins, xmin)
     f[i] = (dist[i].pdf(log_bins))/(1 - dist[i].cdf(xmin))
 
 
-#K1 = max(np.abs(F_0[1:] - F_1))
-#print(K1)
+
+
+D = np.max(np.abs(F_0[1:] - get_cdfcor(dist[0], u, xmin)))
+
+
+pv = st.kstwo(len(hS), loc=0, scale=1).cdf(D)
+print(D)
+print(pv)
+
+exit()
 
 fig = plt.figure(figsize=(20, 10))
 ax = [fig.add_subplot(1, 2, 1), fig.add_subplot(1, 2, 2)]
