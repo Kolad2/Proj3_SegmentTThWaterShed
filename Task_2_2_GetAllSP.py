@@ -16,7 +16,7 @@ from CannyTest import cannythresh, cannythresh_grad
 from ThinSegmentation import ThinSegmentation
 from scipy.spatial import cKDTree, KDTree
 
-Path0 = "/media/kolad/HardDisk/ThinSection"
+Path0 = "D:\ThinSection"
 
 FileNames = ["B21-234a",    #0
              "B21-215b",    #1
