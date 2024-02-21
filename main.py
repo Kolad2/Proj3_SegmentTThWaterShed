@@ -62,9 +62,9 @@ n = 10
 start_img = False
 b_shapewrite = True
 #
-#img = img[0:2 ** n, 0:2 ** n]
-#result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
-#result_line = result_line[0:2 ** n, 0:2 ** n]
+img = img[0:2 ** n, 0:2 ** n]
+result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
+result_line = result_line[0:2 ** n, 0:2 ** n]
 
 if start_img:
     fig = plt.figure(figsize=(10, 10))
@@ -78,18 +78,14 @@ if start_img:
 
 
 TS0 = ThinSegmentation(img, result_rsf, result_line)
-TS0.method2()
+TS0.method3()
+
 #S = TS0.get_marks_areas()
-S, P = TS0.get_SP()
+#S, P = TS0.get_SP()
 
-dict = {'S': S, 'P': P}
-scipy.io.savemat("temp/" + FileName + "_S.mat", dict)
+#dict = {'S': S, 'P': P}
+#scipy.io.savemat("temp/" + FileName + "_S.mat", dict)
 
-exit()
-
-
-#TS1 = ThinSegmentation(img, result_rsf)
-#TS1.method0_1()
 
 fig = plt.figure(figsize=(10, 10))
 ax = [fig.add_subplot(2, 2, 1),
@@ -101,6 +97,14 @@ ax[0].imshow(cv2.merge((TS0.area_bg,TS0.area_bg,TS0.area_bg)))
 ax[1].imshow(img)
 #ax[3].imshow(cv2.merge((result_rsf,result_rsf,result_rsf)))
 plt.show()
+
+exit()
+
+
+#TS1 = ThinSegmentation(img, result_rsf)
+#TS1.method0_1()
+
+
 
 
 

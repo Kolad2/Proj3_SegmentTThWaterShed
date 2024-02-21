@@ -168,7 +168,8 @@ class ThinSegmentation:
         self.edges_w = self.get_edge_prob()
         edges_w = np.uint8((self.edges_w / self.edges_w.max()) * 255)
         edges_0 = np.zeros(edges_w.shape, np.uint8)
-        for i in range(1, 255):
+        for i in range(10, 255, 1):
+            print(i)
             kernel = np.ones((3, 3), np.uint8)
             ret, result_bin = cv2.threshold(edges_w, i, 255, cv2.THRESH_BINARY)
             result_bin = cv2.erode(result_bin, kernel, iterations=1)
@@ -180,12 +181,12 @@ class ThinSegmentation:
             edges_0 = cv2.add(edges_0, edges)
         self.area_bg = 255 - edges_0
 
-
-
-
     def add_bg_lineaments(self):
         self.area_bg = 255 - cv2.add(255 - self.area_bg, self.edges_line)
 
+    def dilate_border(self, it=5):
+        kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.uint8)
+        self.area_bg = cv2.erode(self.area_bg, kernel, iterations=it)
 
     def method0(self):
         print("self.get_bg_rsfcanny()")
@@ -216,11 +217,11 @@ class ThinSegmentation:
         self.method1()
         self.marker_unbound_spread()
 
-    def method3(self):
-        self.get_bg_rsfthin()
-        self.add_bg_lineaments()
-        self.get_marker_from_background_iter()
-        self.get_marker_from_background_iter()
+
+    def method3(self, it=5):
+        self.get_bg_rsf_skeleton_base()
+        self.dilate_border(it)
+        self.closes2segment()
         self.marker_unbound_spread()
 
 
