@@ -303,9 +303,10 @@ class ThinSegmentation:
         for i in range(l-1):
             self.area_marks[self.area_marks == i + 2] = numlist[i]
 
-    def get_masks(self):
+    def get_masks(self, area_marks=None):
+        if area_marks is None:
+            area_marks = self.area_marks
         masks = []
-        area_marks = self.area_marks
         for i in range(area_marks.max()):
             mask = {'segmentation': area_marks == i, 'bbox': (0, 0, 0, 0)}
             segmentation = np.where(mask['segmentation'])

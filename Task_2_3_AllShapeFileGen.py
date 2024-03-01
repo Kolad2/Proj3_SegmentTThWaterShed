@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import PathCreator
 from typing import Any
@@ -16,6 +16,7 @@ from CannyTest import cannythresh, cannythresh_grad
 from ThinSegmentation import ThinSegmentation
 from scipy.spatial import cKDTree, KDTree
 from Shpreader import get_shp_poly
+import random
 
 Path0 = "/media/kolad/HardDisk/ThinSection"
 
@@ -40,42 +41,80 @@ FileNames = ["B21-234a",    #0
              "19-5b"]       #18
 
 n = 10
-lw = 1
+method = 1
 for FileName in FileNames:
-	for lw in range(1,22,2):
-		print(FileName,lw)
-		Path_dir = Path0 + "/" + FileName + "/"
-		Path_img = Path_dir + "Picture" + "/" + FileName + ".tif"
-		# image loading
-		img = cv2.imread(Path_img)
-		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-		sh = img.shape
-		img = img[
-		      int(sh[0]/2 - sh[0]/3):int(sh[0]/2 + sh[0]/3),
-		      int(sh[1]/2 - sh[1]/3):int(sh[1]/2 + sh[1]/3)]
+	Path_dir = Path0 + "/" + FileName + "/"
+	Path_img = Path_dir + "Picture" + "/" + FileName + ".tif"
+	# image loading
+	img = cv2.imread(Path_img)
+	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+	sh = img.shape
+	img = img[
+	      int(sh[0] / 2 - sh[0] / 3):int(sh[0] / 2 + sh[0] / 3),
+	      int(sh[1] / 2 - sh[1] / 3):int(sh[1] / 2 + sh[1] / 3)]
+	#img = img[0:2 ** n, 0:2 ** n]
+	summask = np.zeros((img.shape[0],img.shape[1]))
+	intermax = 500
+	S = []
+	P = []
+	for i in range(0, intermax, 1):
+		print(FileName, i)
 		# RSF_result load
 		Path_rsf = Path_dir + "RSF_edges" + "/" + FileName + "_edges_cut.tif"
 		img_rsf = cv2.imread(Path_rsf)
 		result_rsf,_,_ = cv2.split(img_rsf)
 		# Lineaments load
-		#Path_line = Path_dir + "Lineaments" + "/" + FileName + "_lin_cut.tif"
-		#img_line = cv2.imread(Path_line)
-		#result_line,_,_ = cv2.split(img_line)
-
 		Path_shape = Path_dir + "Joined/" + FileName + "_joined"
-		poly = get_shp_poly(Path_shape)
+		polys = get_shp_poly(Path_shape)
 		result_line = np.zeros(sh[0:2], dtype=np.uint8)
-		result_line = cv2.polylines(result_line, poly, False, 255, lw)
+		#print(len(polys))
+		polys2 = []
+		for poly in polys:
+			#L = 0
+			#for j in range(1,len(poly)):
+			#	L = L + math.sqrt(sum((poly[j] - poly[j-1])**2))
+			if random.randint(0, 19) > 3:
+				polys2.append(poly)
+
+		result_line = cv2.polylines(result_line, polys2, False, 255, 3)
 		result_line = result_line[
 		            int(sh[0] / 2 - sh[0] / 3):int(sh[0] / 2 + sh[0] / 3),
 		            int(sh[1] / 2 - sh[1] / 3):int(sh[1] / 2 + sh[1] / 3)]
-
-		img = img[0:2 ** n, 0:2 ** n]
-		result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
+		#result_rsf = result_rsf[0:2 ** n, 0:2 ** n]
 		#result_line = result_line[0:2 ** n, 0:2 ** n]
+		TS = ThinSegmentation(img, result_rsf, result_line)
+		TS.method2()
+		lS, lP = TS.get_SP()
+		S.append(lS)
+		P.append(lP)
 
-		#TS0 = ThinSegmentation(img, result_rsf, result_line)
-		TS0 = ThinSegmentation(img, result_rsf)
-		TS0.method3(lw)
-		mask_write_treads("Shapes/Shape_" + FileName + "/Shape_" + str(lw) + "_" + FileName + "/Shape_" + str(lw) + "_" + FileName, TS0.get_masks())
-		cv2.imwrite("Shapes/Shape_" + FileName + "/img_" + FileName + ".tif", img)
+		#mask = TS.area_marks
+		#mask[mask == -1] = 0
+		#mask[mask > 0] = 1
+		#summask = summask + mask
+
+	#summask = summask/intermax
+	#summask2 = summask.copy()
+	#summask2[summask2 > 0.5] = 1
+	#summask2[summask2 <= 0.5] = 0
+	#summask2 = np.uint8((summask2 / summask2.max()) * 255)
+	#kernel = np.array([[0,1,0],[1,1,1],[0,1,0]], np.uint8)
+	#summask2 = cv2.erode(summask2, kernel, iterations=1)
+	#ret, area_marks = cv2.connectedComponents(summask2)
+	#
+	#mask_write_treads("Shapes/Shape_" + FileName + "/Shape_" + str(method) + "_" + FileName + "/Shape_" + str(method) + "_" + FileName, TS.get_masks(area_marks))
+	#cv2.imwrite("Shapes/Shape_" + FileName + "/img_" + FileName + ".tif", img)
+	dict = {'S': S, 'P': P}
+	if not os.path.exists("temp/StatisticData/" + FileName):
+		os.mkdir("temp/StatisticData/" + FileName)
+	scipy.io.savemat("temp/StatisticData/" + FileName + "/" + FileName + "_" + str(method) + "_S.mat", dict)
+
+"""fig = plt.figure(figsize=(10, 10))
+	ax = [fig.add_subplot(2, 2, 1),
+	      fig.add_subplot(2, 2, 2),
+	      fig.add_subplot(2, 2, 3)]
+	ax[0].imshow(summask)
+	ax[1].imshow(summask2)
+	print(np.unique(area_marks))
+	ax[2].imshow(area_marks)
+	plt.show()"""

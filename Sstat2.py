@@ -1,25 +1,57 @@
 import os
 import sys
-
 import scipy.io
 import PathCreator
 from typing import Any
 import numpy as np
 import matplotlib.pyplot as plt
-import cv2
 import time
 import pickle
 import math
-from scipy.stats._continuous_distns import lognorm_gen
 from scipy.ndimage import histogram
 from scipy import stats as st
 from scipy.special import factorial
 from scipy.special import gamma
 import scipy.stats as st
 import scipy.optimize as opt
-from ListFiles import GetFiles
-from ShpMaskWriter import mask_write, mask_write_treads
-from scipy.optimize import minimize, rosen, rosen_der
+from scipy.optimize import minimize
+
+
+def target_lognorm(s, scale, X, xmin):
+    dist = st.lognorm(s, 0, scale)
+    Fmin = dist.cdf(xmin)
+    return -np.sum(np.log(dist.pdf(X)/(1 - Fmin)))
+
+
+def target_expon(scale, X, xmin):
+    Fmin = 1 - np.exp(xmin/scale)
+    S = -(np.sum(-X/scale) - len(X)*np.log(scale) - len(X)*np.log(1 - Fmin))
+    return S
+
+def GetThetaLognorm(X, xmin):
+    theta = st.lognorm.fit(X, floc=0)
+    res = minimize(lambda x: target_lognorm(x[0], x[1], X, xmin), [theta[0], theta[2]], method='Nelder-Mead', tol=1e-3)
+    return res.x[0], 0, res.x[1]
+
+def GetThetaExpon(X, xmin):
+    theta = st.expon.fit(X, floc=0)
+    res = minimize(lambda x: target_expon(x, X, xmin), theta[1], method='Nelder-Mead', tol=1e-3)
+    return 0, res.x[0]
+
+def GetF(S, f_bins, xmin, xmax=10 ** 10):
+    S = S[S > xmin]
+    F_bins, F = np.unique(S, return_counts=True)
+    F_bins = np.insert(F_bins,0,0)
+    F_bins = np.append(F_bins, xmax)
+    F = np.cumsum(F)
+    F = np.insert(F, 0, 0)
+    F = F / F[-1]
+    f, _ = np.histogram(S, bins=f_bins, density=True)
+    return F_bins, F, f
+
+def Getf(S, f_bins):
+    f, _ = np.histogram(S, bins=f_bins, density=True)
+    return f
 
 FileNames = ["B21-234a",    #0
              "B21-215b",    #1
@@ -40,86 +72,62 @@ FileNames = ["B21-234a",    #0
              "B21-200b",    #16
              "B21-192b",    #17
              "19-5b"]       #18
-FileName = FileNames[10]
+FileName = FileNames[0]
 
-xmin = 20
+xmin = 10
 
-matdict = scipy.io.loadmat("temp/StatisticData/" + FileName + "/" + FileName + "_1" + "_S.mat")
-S = matdict['S'][0]
-P = matdict['P'][0]
-S = S[2:]
-P = P[2:]
-hS = np.empty(len(S), dtype=float)
-for i in range(0,len(S)):
-    hS[i] = S[i] + np.sum(st.uniform.rvs(size=P[i]))
-hS = hS[hS > xmin]
-u, c = np.unique(hS, return_counts=True)
-bins = np.empty(len(u)+2, dtype=float)
-counts = np.empty(len(c)+1, dtype=float)
-bins[0] = 0; bins[1:-1] = u; bins[-1] = 10**10
-c = np.cumsum(c)
-counts[0] = 0; counts[1:] = c
-F_0 = counts/counts[-1]
+matdict = scipy.io.loadmat("temp/StatisticData/" + FileName + "/" + FileName + "_1" + "_S.mat", squeeze_me=True)
 
-log_bins = xmin*np.logspace(0,10,160,base=2)
-f_0,_ = np.histogram(hS, bins=log_bins, density=True)
+hS = matdict['S']
+P = matdict['P']
+print(hS)
+F_0 = []
+f_0 = []
+F_bins = []
+f_bins = xmin*np.logspace(0,10,120,base=2)
+f_0_m = np.empty(len(f_bins))
+f_0_sgm = np.empty(len(f_bins))
+numinter = 500
+for j in range(0,numinter):
+    hS[j] = hS[j][hS[j] > xmin]
+    f_0.append(Getf(hS[j], f_bins))
 
-
-def target_lognorm(s, scale, X, xmin):
-    dist = st.lognorm(s, 0, scale)
-    Fmin = dist.cdf(xmin)
-    return -np.sum(np.log(dist.pdf(X)/(1 - Fmin)))
-
-
-def target_expon(scale, X, xmin):
-    Fmin = 1 - np.exp(xmin/scale)
-    S = -(np.sum(-X/scale) - len(X)*np.log(scale) - len(X)*np.log(1 - Fmin))
-    return S
-
-def f_lognorm(x):
-    return target_lognorm(x[0], x[1], hS, xmin)
-
-def f_expon(x):
-    return target_expon(x, hS, xmin)
-
-def GetThetaLognorm():
-    theta = st.lognorm.fit(hS, floc=0)
-    res = minimize(f_lognorm, [theta[0], theta[2]], method='Nelder-Mead', tol=1e-6)
-    return res.x[0], 0, res.x[1]
-
-def GetThetaExpon():
-    theta = st.expon.fit(hS, floc=0)
-    res = minimize(f_expon, theta[1], method='Nelder-Mead', tol=1e-6)
-    return 0, res.x[0]
-
+f_0_med = np.median(f_0, axis=0)
+f_0_m = np.mean(f_0, axis=0)
+f_0_sgm = np.sqrt(np.mean((f_0-f_0_m)**2, axis=0))
+print(f_0_sgm)
 
 theta = [[] for i in range(0,2)]
 dist = [[] for i in range(0,2)]
 F = [[] for i in range(0,2)]
 f = [[] for i in range(0,2)]
-theta[0] = GetThetaLognorm()
-theta[1] = GetThetaExpon();print(theta[1])
+
+theta[0] = GetThetaLognorm(hS[0], xmin)
+#theta[1] = GetThetaExpon(hS[0], xmin)
 
 
 dist[0] = st.lognorm(theta[0][0], 0, theta[0][2])
-dist[1] = st.expon(0, theta[1][1])
-
-def get_cdfcor(dist, X, xmin):
-    return (dist.cdf(X) - dist.cdf(xmin)) / (1 - dist.cdf(xmin))
-
-for i in range(0,2):
-    F[i] = get_cdfcor(dist[i], log_bins, xmin)
-    f[i] = (dist[i].pdf(log_bins))/(1 - dist[i].cdf(xmin))
+#dist[1] = st.expon(0, theta[1][1])
 
 
 
 
-D = np.max(np.abs(F_0[1:] - get_cdfcor(dist[0], u, xmin)))
 
 
-pv = st.kstwo(len(hS), loc=0, scale=1).cdf(D)
-print(D)
-print(pv)
+fig = plt.figure(figsize=(20, 10))
+ax = [fig.add_subplot(1, 1, 1)]
+ax[0].set_xscale('log')
+ax[0].stairs(f_0_m + f_0_sgm/2, f_bins, fill=True, color='red')
+ax[0].stairs(f_0_m - f_0_sgm/2, f_bins, fill=True, color='blue')
+ax[0].plot(f_bins, dist[0].pdf(f_bins), color='black')
+fig.savefig("temp/" + FileName + "_pf_S.png")
+plt.show()
+exit()
+
+
+#ax[1].plot(log_bins, f[0],color='b')
+#ax[1].plot(log_bins, f[1],color='r')
+
 
 fig = plt.figure(figsize=(20, 10))
 ax = [fig.add_subplot(1, 2, 1), fig.add_subplot(1, 2, 2)]
@@ -155,6 +163,14 @@ ax[0].set_yscale('log')
 ax[0].stairs(f_0, log_bins, fill=True)
 plt.show()
 exit()
+
+
+def get_cdfcor(dist, X, xmin):
+    return (dist.cdf(X) - dist.cdf(xmin)) / (1 - dist.cdf(xmin))
+
+for i in range(0,2):
+    F[i] = get_cdfcor(dist[i], log_bins, xmin)
+    f[i] = (dist[i].pdf(log_bins))/(1 - dist[i].cdf(xmin))
 """
 
 
