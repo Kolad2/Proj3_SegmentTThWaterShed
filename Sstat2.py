@@ -80,22 +80,25 @@ matdict = scipy.io.loadmat("temp/StatisticData/" + FileName + "/" + FileName + "
 
 hS = matdict['S']
 P = matdict['P']
-print(hS)
 F_0 = []
 f_0 = []
 F_bins = []
-f_bins = xmin*np.logspace(0,10,120,base=2)
+f_bins = xmin*np.logspace(0,10,60,base=2)
 f_0_m = np.empty(len(f_bins))
 f_0_sgm = np.empty(len(f_bins))
 numinter = 500
 for j in range(0,numinter):
+    hS[j]  = hS[j] + P[j]/2
     hS[j] = hS[j][hS[j] > xmin]
     f_0.append(Getf(hS[j], f_bins))
 
 f_0_med = np.median(f_0, axis=0)
 f_0_m = np.mean(f_0, axis=0)
 f_0_sgm = np.sqrt(np.mean((f_0-f_0_m)**2, axis=0))
-print(f_0_sgm)
+f_0_low = np.quantile(f_0, 0.1, axis=0)
+f_0_height = np.quantile(f_0, 0.9, axis=0)
+
+
 
 theta = [[] for i in range(0,2)]
 dist = [[] for i in range(0,2)]
@@ -117,8 +120,8 @@ dist[0] = st.lognorm(theta[0][0], 0, theta[0][2])
 fig = plt.figure(figsize=(20, 10))
 ax = [fig.add_subplot(1, 1, 1)]
 ax[0].set_xscale('log')
-ax[0].stairs(f_0_m + f_0_sgm/2, f_bins, fill=True, color='red')
-ax[0].stairs(f_0_m - f_0_sgm/2, f_bins, fill=True, color='blue')
+ax[0].stairs(f_0_height, f_bins, fill=True, color='red')
+ax[0].stairs(f_0_low, f_bins, fill=True, color='blue')
 ax[0].plot(f_bins, dist[0].pdf(f_bins), color='black')
 fig.savefig("temp/" + FileName + "_pf_S.png")
 plt.show()
