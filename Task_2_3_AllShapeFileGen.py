@@ -73,7 +73,7 @@ for FileName in FileNames:
 			#L = 0
 			#for j in range(1,len(poly)):
 			#	L = L + math.sqrt(sum((poly[j] - poly[j-1])**2))
-			if random.randint(0, 19) > 3:
+			if random.randint(0, 19) > 6:
 				polys2.append(poly)
 
 		result_line = cv2.polylines(result_line, polys2, False, 255, 3)
