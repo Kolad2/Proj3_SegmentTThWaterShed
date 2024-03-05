@@ -43,7 +43,7 @@ for FileName in FileNames:
     numinter = 500
     hS = [[] for i in range(0, numinter)]
     for j in range(0,numinter):
-        mask = S[j] > 9
+        mask = S[j] > 5
         S[j] = S[j][mask]
         P[j] = P[j][mask]
         hS[j] = np.empty(len(S[j]), dtype=float)
