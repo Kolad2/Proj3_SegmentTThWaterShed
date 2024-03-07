@@ -224,7 +224,7 @@ for FileName in FileNames:
 
     fig = plt.figure(figsize=(20, 10))
     ax = [fig.add_subplot(1, 2, 1),
-          fig.add_subplot(1, 2, 2)]
+      fig.add_subplot(1, 2, 2)]
     ax[0].set_xscale('log')
     ax[0].fill_between(f_bins, F_0_min, F_0_max, alpha=.2, linewidth=0, color='red')
     ax[0].plot(f_bins, F[0], color='black')
@@ -236,16 +236,18 @@ for FileName in FileNames:
     ax[1].set_xscale('log')
     ax[1].set_yscale('log')
     ax[1].fill_between(f_bins[0:-1], f_0_low, np.insert(f_0_height[0:-1], 0, f_0_height[0]), alpha=0.8, linewidth=0, color='red')
-    ax[1].plot(f_bins, f[0], color='black')
+    ax[1].plot(f_bins, f[0],
+               color='black',label="lognormal")
     ax[1].plot(f_bins, f[1],
-               color='black',linestyle='dashdot')
+           color='black',linestyle='dashdot',label="expon")
     ax[1].plot(f_bins[f_bins > xgp], f[2][f_bins > xgp],
-               color='black',linestyle='dashed')
+           color='black',linestyle='dashed',label="pareto " + str(int(xgp)))
     ax[1].set_ylim((f_0_low[-1], f_0_height[0]))
     ax[1].set_xlim((f_bins[0], f_bins[-2]))
+    ax[1].legend()
     fig.suptitle(FileName, fontsize=16)
     fig.savefig("temp/" + FileName + "_pf_S.png")
-#plt.show()
+    #plt.show()
 
 
 exit()
