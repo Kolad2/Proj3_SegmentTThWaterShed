@@ -46,8 +46,16 @@ class ThinSegmentation:
         area_marks[area_bg == 0] = 1
         return cv2.watershed(self.img, area_marks)
 
-    def marker_unbound_spread(self):
-        self.area_marks = self.watershed_iter(self.area_marks, self.area_bg * 0 + 255)
+    def marker_unbound_spread(self, edge=None):
+        if edge is None:
+            edge = self.area_bg*0+255
+        self.area_marks = self.watershed_iter(self.area_marks, edge)
+
+    def get_edge(self, edge_poly):
+        edge_mask = 255 - np.zeros(self.img.shape[0:2], np.uint8)
+        edge_zero = np.array([[0, 0], [self.img.shape[1], 0], [self.img.shape[1], self.img.shape[0]], [0, self.img.shape[0]]])
+        cv2.fillPoly(edge_mask, pts=[edge_zero, edge_poly[0]], color=0)
+        return edge_mask
 
     def area_marks_edgeupdate(self, area_marks):
         area_marks[area_marks == -1] = 0
@@ -213,9 +221,9 @@ class ThinSegmentation:
         self.add_bg_lineaments()
         self.closes2segment()
 
-    def method2(self):
+    def method2(self, edge):
         self.method1()
-        self.marker_unbound_spread()
+        self.marker_unbound_spread(edge)
 
 
     def method3(self, it=5):

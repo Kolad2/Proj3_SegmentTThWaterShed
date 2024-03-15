@@ -36,11 +36,14 @@ FileNames = ["B21-234a",    #0
              "B21-200b",    #16
              "B21-192b",    #17
              "19-5b"]       #18
+
+numinter = 10
+FileNames = [FileNames[18]]
+
 for FileName in FileNames:
-    matdict = scipy.io.loadmat("temp/StatisticData/" + FileName + "/" + FileName + "_1" + "_S.mat", squeeze_me=True)
+    matdict = scipy.io.loadmat("temp/StatisticSintData/" + FileName + "/" + FileName + "_S.mat", squeeze_me=True)
     S = matdict['S']
     P = matdict['P']
-    numinter = 500
     hS = [[] for i in range(0, numinter)]
     for j in range(0,numinter):
         mask = S[j] > 5
@@ -53,4 +56,4 @@ for FileName in FileNames:
     dict = {"S": hS, "P": P}
     if not os.path.exists("temp/StatisticCorData/" + FileName):
         os.mkdir("temp/StatisticCorData/" + FileName)
-    scipy.io.savemat("temp/StatisticCorData/" + FileName + "/" + FileName + "_" + str(1) + "_S.mat", dict)
+    scipy.io.savemat("temp/StatisticCorData/" + FileName + "/" + FileName + "_S.mat", dict)

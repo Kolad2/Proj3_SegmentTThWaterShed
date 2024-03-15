@@ -44,7 +44,7 @@ FileName = FileNames[10]
 
 xmin = 20
 
-matdict = scipy.io.loadmat("temp/StatisticData/" + FileName + "/" + FileName + "_1" + "_S.mat")
+matdict = scipy.io.loadmat("temp/StatisticRawData/" + FileName + "/" + FileName + "_1" + "_S.mat")
 S = matdict['S'][0]
 P = matdict['P'][0]
 S = S[2:]

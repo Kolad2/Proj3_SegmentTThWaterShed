@@ -68,7 +68,7 @@ class Averagvalue(object):
 def save_checkpoint(state, filename='checkpoint.pth'):
     torch.save(state, filename)
 
-def load_pretrained(model, fname, optimizer=None):
+def load_pretrained(model, fname, optimizer=None, device='cpu'):
     """
     resume training from previous checkpoint
     :param fname: filename(with path) of checkpoint file
@@ -76,7 +76,7 @@ def load_pretrained(model, fname, optimizer=None):
     """
     if os.path.isfile(fname):
         print("=> loading checkpoint '{}'".format(fname))
-        checkpoint = torch.load(fname,map_location=torch.device('cpu'))
+        checkpoint = torch.load(fname,map_location=torch.device(device))
         model.load_state_dict(checkpoint['state_dict'])
         if optimizer is not None:
             optimizer.load_state_dict(checkpoint['optimizer'])

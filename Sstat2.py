@@ -156,13 +156,13 @@ FileNames = ["B21-234a",    #0
              "B21-200b",    #16
              "B21-192b",    #17
              "19-5b"]       #18
-FileName = FileNames[1]
+FileNames = [FileNames[18]]
 
 for FileName in FileNames:
     xmin = 20
     xmax = 10*10
 
-    matdict = scipy.io.loadmat("temp/StatisticCorData/" + FileName + "/" + FileName + "_1" + "_S.mat", squeeze_me=True)
+    matdict = scipy.io.loadmat("temp/StatisticSintData/" + FileName + "/" + FileName + "_S.mat", squeeze_me=True)
 
     hS = matdict['S']
     P = matdict['P']
@@ -172,7 +172,7 @@ for FileName in FileNames:
     f_bins = xmin*np.logspace(0,10,60,base=2)
     f_0_m = np.empty(len(f_bins))
     f_0_sgm = np.empty(len(f_bins))
-    numinter = 500
+    numinter = 10
     for j in range(0, numinter):
         hS[j] = hS[j][hS[j] > xmin]
         f_0.append(Getf(hS[j], f_bins))
