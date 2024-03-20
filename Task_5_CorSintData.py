@@ -37,15 +37,17 @@ FileNames = ["B21-234a",    #0
              "B21-192b",    #17
              "19-5b"]       #18
 
-numinter = 10
-FileNames = [FileNames[18]]
+Path0 = "temp/StatisticSintData"
+FileNames = os.listdir(Path0)
+intermax = 500
 
 for FileName in FileNames:
+    print(FileName)
     matdict = scipy.io.loadmat("temp/StatisticSintData/" + FileName + "/" + FileName + "_S.mat", squeeze_me=True)
     S = matdict['S']
     P = matdict['P']
-    hS = [[] for i in range(0, numinter)]
-    for j in range(0,numinter):
+    hS = [[] for i in range(0, intermax)]
+    for j in range(0, intermax):
         mask = S[j] > 5
         S[j] = S[j][mask]
         P[j] = P[j][mask]

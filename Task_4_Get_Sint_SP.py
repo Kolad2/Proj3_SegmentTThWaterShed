@@ -1,20 +1,12 @@
 ﻿import os
 import sys
 import PathCreator
-from typing import Any
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 import scipy
 import time
-import pickle
-import math
-from ListFiles import GetFiles
-from ShpMaskWriter import mask_write, mask_write_treads
-from rsf_edges import modelini, get_model_edges
-from CannyTest import cannythresh, cannythresh_grad
 from ThinSegmentation import ThinSegmentation
-from scipy.spatial import cKDTree, KDTree
 from Shpreader import get_shp_poly
 import random
 
@@ -42,7 +34,7 @@ for FileName in FileNames:
 		print("Шейп файл границ не найден")
 		continue
 	if os.path.exists("temp/StatisticSintData/" + FileName + "/" + FileName + "_S.mat"):
-		print("Найдена копия шейп файла, пропуск")
+		print("Найдена копия мат файла, пропуск")
 		continue
 	# image loading
 	img = cv2.imread(Path_img)
@@ -72,7 +64,7 @@ for FileName in FileNames:
 		result_line = cv2.polylines(result_line, polys2, False, 255, 3)
 		TS = ThinSegmentation(img, result_rsf, result_line)
 		edge_mask = TS.get_edge(edge_poly)
-		TS.method2(edge_mask)
+		TS.method2(edge_mask) 
 		lS, lP = TS.get_SP()
 		S.append(lS)
 		P.append(lP)
