@@ -13,7 +13,6 @@ class ThinSS:
         self.edges_w = edges_w
         self.edges_line = edges_line
 
-
     def marker_unbound_spread(self, edge=None):
         if edge is None:
             edge = self.area_bg*0+255
