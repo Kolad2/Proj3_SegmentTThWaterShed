@@ -43,7 +43,12 @@ intermax = 500
 
 for FileName in FileNames:
     print(FileName)
-    matdict = scipy.io.loadmat("temp/StatisticSintData/" + FileName + "/" + FileName + "_S.mat", squeeze_me=True)
+    SintFile = "temp/StatisticSintData/" + FileName + "/" + FileName + "_S.mat"
+    CorFile = "temp/StatisticCorData/" + FileName + "/" + FileName + "_S.mat"
+    if os.path.exists(CorFile):
+        print("Файл коррекции существует, пропуск")
+        continue
+    matdict = scipy.io.loadmat(SintFile, squeeze_me=True)
     S = matdict['S']
     P = matdict['P']
     hS = [[] for i in range(0, intermax)]
@@ -58,4 +63,4 @@ for FileName in FileNames:
     dict = {"S": hS, "P": P}
     if not os.path.exists("temp/StatisticCorData/" + FileName):
         os.mkdir("temp/StatisticCorData/" + FileName)
-    scipy.io.savemat("temp/StatisticCorData/" + FileName + "/" + FileName + "_S.mat", dict)
+    scipy.io.savemat(CorFile, dict)

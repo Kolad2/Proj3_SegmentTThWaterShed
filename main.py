@@ -23,8 +23,8 @@ with open('temp/ResultTable.csv', newline='') as csvfile:
     rows = list(csv.reader(csvfile, delimiter=',', quotechar='|'))
     tb = pd.DataFrame(rows[1:], columns=rows[0])
 
-#tb = tb[tb["Lognorm boolean"] == "True"]
-tb = tb[tb["ТипыТектонитов"] == "Милонит"]
+tb = tb[tb["Lognorm boolean"] == "True"]
+#tb = tb[tb["ТипыТектонитов"] == "Милонит"]
 
 
 L_mu = pd.to_numeric(tb["Lognorm mu"]).values

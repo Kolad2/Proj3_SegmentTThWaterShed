@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import cv2
 import scipy
 import time
-from ThinSegmentation import ThinSegmentation
+from ThinSS import ThinSS
 from Shpreader import get_shp_poly
 import random
 
@@ -53,18 +53,18 @@ for FileName in FileNames:
 	S = []
 	P = []
 	for i in range(0, intermax, 1):
-		print(FileName, i)
+		print(FileName, i, "/", intermax, flush=True)
 		polys = get_shp_poly(Path_shape)
 		result_line = np.zeros(img.shape[0:2], dtype=np.uint8)
 		polys2 = []
+
 		for poly in polys:
 			if random.randint(0, 19) > 6:
 				polys2.append(poly)
-
 		result_line = cv2.polylines(result_line, polys2, False, 255, 3)
-		TS = ThinSegmentation(img, result_rsf, result_line)
+		TS = ThinSS(img, result_rsf, result_line)
 		edge_mask = TS.get_edge(edge_poly)
-		TS.method2(edge_mask) 
+		TS.method2(edge_mask)
 		lS, lP = TS.get_SP()
 		S.append(lS)
 		P.append(lP)

@@ -16,23 +16,22 @@ from CannyTest import cannythresh, cannythresh_grad
 
 class ThinSegmentation:
     def __init__(self, img, edges_w=None, edges_line=None):
-
         self.img = img
         self.shape = img.shape
         lab = cv2.cvtColor(self.img, cv2.COLOR_BGR2LAB)
-        l_c, a, b = cv2.split(lab)
-        self.img_gray = l_c
-        self.area_sure = np.empty(self.shape[0:2], dtype=np.uint8)
-        self.area_unknown = np.empty(self.shape[0:2], dtype=np.uint8)
+        #l_c, _, _ = cv2.split(lab)
+        #self.img_gray = l_c
+        self.area_sure = None#np.empty(self.shape[0:2], dtype=np.uint8)
+        self.area_unknown = None#np.empty(self.shape[0:2], dtype=np.uint8)
         self.area_dist = None
-        self.area_bg = np.empty(self.shape[0:2], dtype=np.uint8)
+        self.area_bg = None#np.empty(self.shape[0:2], dtype=np.uint8)
         self.area_marks = None
         if edges_w is not None:
-            self.edges_w = edges_w.copy()
+            self.edges_w = edges_w
         else:
             self.edges_w = None
         if edges_line is not None:
-            self.edges_line = edges_line.copy()
+            self.edges_line = edges_line
         else:
             self.edges_line = None
 
@@ -49,7 +48,10 @@ class ThinSegmentation:
     def marker_unbound_spread(self, edge=None):
         if edge is None:
             edge = self.area_bg*0+255
-        self.area_marks = self.watershed_iter(self.area_marks, edge)
+        self.area_marks[self.area_marks == -1] = 0
+        self.area_marks[self.area_marks == 1] = 0
+        self.area_marks[edge == 0] = 1
+        self.area_marks = cv2.watershed(self.img, self.area_marks)
 
     def get_edge(self, edge_poly):
         edge_mask = 255 - np.zeros(self.img.shape[0:2], np.uint8)
@@ -113,7 +115,7 @@ class ThinSegmentation:
     def closes2segment(self, area_bg=None):
         if area_bg is None:
             area_bg = self.area_bg
-        ret, area_marks = cv2.connectedComponents(self.area_bg)
+        _, area_marks = cv2.connectedComponents(self.area_bg)
         self.area_marks = area_marks + 1
 
 
@@ -122,7 +124,7 @@ class ThinSegmentation:
             self.edges_w = np.empty(self.shape[0:2], dtype=np.float32)
             model = modelini()
             self.edges_w[:] = get_model_edges(model, self.img)
-        return self.edges_w.copy()
+        return self.edges_w
 
     def set_edge_prob(self, edges_w):
         self.edges_w = edges_w.copy()
@@ -166,10 +168,6 @@ class ThinSegmentation:
         self.edges_w = self.get_edge_prob()
         result = np.uint8((self.edges_w / self.edges_w.max()) * 255)
         ret, result = cv2.threshold(result, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        #result = cv2.ximgproc.thinning(result)
-        result = np.uint8((result / result.max()) * 255)
-        kernel = np.ones((2, 2), np.uint8)
-        result = cv2.dilate(result, kernel, iterations=1)
         self.area_bg = 255 - result
 
     def get_bg_rsf_skeleton_base(self):
