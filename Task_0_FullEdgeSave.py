@@ -43,9 +43,9 @@ dx = 1000
 dy = 1000
 ddx = 256
 ddy = 256
-
-Path0 = "/media/kolad/HardDisk/ThinSection"
 Path0 = "/media/kolad/HardDisk/TSnew"
+Path0 = "/media/kolad/HardDisk/ThinSection"
+
 FileNames = os.listdir(Path0)
 print(FileNames)
 

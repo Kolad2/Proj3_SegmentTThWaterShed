@@ -36,6 +36,7 @@ for FileName in FileNames:
 	if os.path.exists("temp/StatisticSintData/" + FileName + "/" + FileName + "_S.mat"):
 		print("Найдена копия мат файла, пропуск")
 		continue
+
 	# image loading
 	img = cv2.imread(Path_img)
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -64,7 +65,7 @@ for FileName in FileNames:
 		result_line = cv2.polylines(result_line, polys2, False, 255, 3)
 		TS = ThinSS(img, result_rsf, result_line)
 		edge_mask = TS.get_edge(edge_poly)
-		TS.method2(edge_mask)
+		TS.RunSegmentation(edge_mask)
 		lS, lP = TS.get_SP()
 		S.append(lS)
 		P.append(lP)

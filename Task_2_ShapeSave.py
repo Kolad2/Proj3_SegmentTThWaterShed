@@ -14,7 +14,7 @@ from ListFiles import GetFiles
 from ShpMaskWriter import mask_write, mask_write_treads
 from rsf_edges import modelini, get_model_edges
 from CannyTest import cannythresh, cannythresh_grad
-from ThinSegmentation import ThinSegmentation
+from ThinSS import ThinSS
 from scipy.spatial import cKDTree, KDTree
 
 
@@ -61,14 +61,9 @@ for FileName in FileNames:
 	edge_zero = np.array([[0, 0], [img.shape[1], 0], [img.shape[1], img.shape[0]], [0, img.shape[0]]])
 	cv2.fillPoly(edge_mask, pts=[edge_zero, edge_poly[0]], color=0)
 
-	#img = img[0:2**n, 0:2**n]
-	#result_rsf = result_rsf[0:2**n, 0:2**n]
-	#result_line = result_line[0:2**n, 0:2**n]
-	#edge_zero = edge_zero[0:2**n, 0:2**n]
-
-	TS = ThinSegmentation(img, result_rsf, result_line)
+	TS = ThinSS(img, result_rsf, result_line)
 	edge_mask = TS.get_edge(edge_poly)
-	TS.method2(edge_mask)
+	TS.RunSegmentation(edge_mask)
 
 	TS.area_bg = TS.area_bg[1000:1000+2 ** n, 1000:1000+2 ** n]
 	TS.area_marks = TS.area_marks[1000:1000+2 ** n, 1000:1000+2 ** n]

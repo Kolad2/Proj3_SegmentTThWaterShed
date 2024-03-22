@@ -3,13 +3,10 @@ import sys
 import PathCreator
 from typing import Any
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
 from Shpreader import get_shp_poly
 import scipy
 import time
-import pickle
-import math
 from ListFiles import GetFiles
 from ShpMaskWriter import mask_write, mask_write_treads
 from rsf_edges import modelini, get_model_edges

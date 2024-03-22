@@ -38,9 +38,11 @@ class ThinSS:
         self.area_unknown[:] = area_unknown
         return area_marks
 
-    def closes2segment(self, area_bg=None):
+    def closes2segment(self, area_bg=None, edge=None):
         if area_bg is None:
             area_bg = self.area_bg
+        if edge is not None:
+            self.area_bg[edge == 0] = 0
         _, area_marks = cv2.connectedComponents(self.area_bg)
         self.area_marks = area_marks + 1
 
@@ -52,13 +54,10 @@ class ThinSS:
     def add_bg_lineaments(self):
         self.area_bg = 255 - cv2.add(255 - self.area_bg, self.edges_line)
 
-    def method1(self):
+    def RunSegmentation(self, edge):
         self.get_bg_rsfbald()
         self.add_bg_lineaments()
-        self.closes2segment()
-
-    def method2(self, edge):
-        self.method1()
+        self.closes2segment(edge=edge)
         self.marker_unbound_spread(edge)
 
     def get_marks_areas(self):
@@ -102,7 +101,7 @@ class ThinSS:
         Y, X = np.mgrid[0:self.area_marks.shape[0], 0:self.area_marks.shape[1]]
         X = X.flatten()[M_fl_s]
         Y = Y.flatten()[M_fl_s]
-        for i in range(0, len(U)):
+        for i in range(3, len(U)):
             Xmin = np.amin(X[FU[i]:FU[i] + CU[i]])
             Xmax = np.amax(X[FU[i]:FU[i] + CU[i]]) + 1
             Ymin = np.amin(Y[FU[i]:FU[i] + CU[i]])
@@ -134,7 +133,7 @@ class ThinSS:
         if area_marks is None:
             area_marks = self.area_marks
         masks = []
-        for i in range(area_marks.max()):
+        for i in range(3, area_marks.max()):
             mask = {'segmentation': area_marks == i, 'bbox': (0, 0, 0, 0)}
             segmentation = np.where(mask['segmentation'])
             if len(segmentation) != 0 and len(segmentation[1]) != 0 and len(segmentation[0]) != 0:
